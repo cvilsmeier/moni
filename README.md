@@ -7,6 +7,12 @@
 A command line tool for https://monibot.io
 
 
+## Download
+
+Download a pre-built Linux/Amd64 binary from here:
+https://github.com/cvilsmeier/moni/releases/latest
+
+
 ## Install
 
 Needs Go 1.20 or higher, download from https://go.dev/
