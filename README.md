@@ -1,5 +1,9 @@
 # moni
 
+[![GoDoc Reference](https://godoc.org/github.com/cvilsmeier/moni?status.svg)](http://godoc.org/github.com/cvilsmeier/moni)
+[![Build Status](https://github.com/cvilsmeier/moni/actions/workflows/go-linux.yml/badge.svg)](https://github.com/cvilsmeier/moni/actions/workflows/go-linux.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A command line tool for https://monibot.io
 
 
@@ -11,6 +15,7 @@ Needs Go 1.20 or higher, download from https://go.dev/
 $ go install github.com/cvilsmeier/moni
 ```
 
+
 ## Usage
 
 Moni supports many commands, list them all with:
@@ -18,9 +23,7 @@ Moni supports many commands, list them all with:
 ```
 $ moni help
 
-moni v0.0.4
-
-Monibot command line tool, see https://monibot.io.
+Moni - A command line tool for https://monibot.io
 
 Usage
 
@@ -36,7 +39,9 @@ Flags
         Monibot API Key, default is "".
         You can set this also via environment variable MONIBOT_API_KEY (recommended).
         You can find your API Key in your profile on https://monibot.io.
-        Note: Keep your API Key secret at all times.
+        Note: For security, we recommend that you specify the API Key
+        via MONIBOT_API_KEY, and not via -apiKey flag. The flag will show up in
+        'ps aux' outputs and can so be eavesdropped.
 
     -trials
         Max. Send trials, default is 12.
@@ -100,7 +105,10 @@ Commands
         Show config values.
 
     version
-        Show program version.
+        Show moni program version.
+
+    sdk-version
+        Show the monibot-go SDK version moni was built with.
 
     help
         Show this help page.
@@ -109,7 +117,6 @@ Exit Codes
     0 ok
     1 error
     2 wrong user input
-
 ```
 
 
