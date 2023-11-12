@@ -271,8 +271,7 @@ func main() {
 	} else if delay > maxDelay {
 		fatal(2, "invalid delay %s, must be <= %s", delay, maxDelay)
 	}
-	// cvvvvvvvvvvv const minSampleInterval = 1 * time.Minute
-	const minSampleInterval = 1 * time.Second
+	const minSampleInterval = 1 * time.Minute
 	const maxSampleInterval = 24 * time.Hour
 	if sampleInterval < minSampleInterval {
 		fatal(2, "invalid sampleInterval %s, must be >= %s", sampleInterval, minSampleInterval)

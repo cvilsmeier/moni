@@ -130,7 +130,7 @@ Exit Codes
 
 ### v0.0.1
 
-- add disk activity to machine samples
+- add disk read/write sampling
 
 ### v0.0.0
 
