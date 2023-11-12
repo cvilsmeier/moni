@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"os"
@@ -27,7 +27,7 @@ func TestVersion(t *testing.T) {
 		return rest
 	}
 	// version.go and README must have same version
-	text := readFile("README.md")
+	text := readFile("../README.md")
 	readmeVersion := "v" + cutout(text, "### v", "\n")
 	if readmeVersion != Version {
 		t.Fatalf("version.go has %q but README.md has %q", Version, readmeVersion)

@@ -128,6 +128,10 @@ Exit Codes
 
 ## Changelog
 
+### v0.0.1
+
+- add disk activity to machine samples
+
 ### v0.0.0
 
 - first version
