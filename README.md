@@ -144,6 +144,10 @@ Exit Codes
 
 ## Changelog
 
+### v0.0.2
+
+- update monibot-go
+
 ### v0.0.1
 
 - add disk read/write sampling

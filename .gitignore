@@ -1,5 +1,3 @@
-*.sh
-cmd/
-bin/
+dev/
 _dist/
 
