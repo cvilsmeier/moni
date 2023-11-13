@@ -286,11 +286,11 @@ func main() {
 			}
 			const minInterval = 1 * time.Minute
 			if interval < minInterval && !dev {
-				fatal(2, "invalid interval %s, must be >= %s", interval, minInterval)
+				fatal(2, "invalid interval %s, must be >= %s", fmtDuration(interval), fmtDuration(minInterval))
 			}
 		}
 		if interval > 0 {
-			log.Printf("will send heartbeats in background every %s", interval)
+			log.Printf("will send heartbeats in background every %s", fmtDuration(interval))
 		}
 		err := api.PostWatchdogHeartbeat(watchdogId)
 		if err != nil {
@@ -342,7 +342,7 @@ func main() {
 		}
 		const minInterval = 1 * time.Minute
 		if interval < minInterval && !dev {
-			fatal(2, "invalid interval %s, must be >= %s", interval, minInterval)
+			fatal(2, "invalid interval %s, must be >= %s", fmtDuration(interval), fmtDuration(minInterval))
 		}
 		sampler := internal.NewSampler()
 		// we must warm up the sampler first
@@ -351,7 +351,7 @@ func main() {
 			fatal(1, "cannot sample: %s", err)
 		}
 		// entering sampling loop
-		log.Printf("will send samples in background every %s", interval)
+		log.Printf("will send samples in background every %s", fmtDuration(interval))
 		for {
 			// sleep
 			time.Sleep(interval)
