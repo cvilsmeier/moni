@@ -6,8 +6,6 @@
 
 A command line tool for https://monibot.io - Web App monitoring for developers.
 
-## What is it?
-
 Moni is a command-line tool to interact with the Monibot REST API. It is used to
 
 - Query machines
