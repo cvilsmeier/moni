@@ -13,27 +13,13 @@ import (
 )
 
 type Sampler struct {
-	// procLoadavg  string
-	// procStat     string
-	// usrBinFree   string
-	diskDevices  map[string]bool
 	lastCpuStat  cpuStat
 	lastDiskStat diskStat
+	lastNetStat  netStat
 }
 
-func NewSampler(diskDevices []string) *Sampler {
-	diskDevicesMap := make(map[string]bool)
-	for _, d := range diskDevices {
-		diskDevicesMap[d] = true
-	}
-	return &Sampler{
-		// "/proc/loadavg",
-		// "/proc/stat",
-		// "/usr/bin/free",
-		diskDevicesMap,
-		cpuStat{},
-		diskStat{},
-	}
+func NewSampler() *Sampler {
+	return &Sampler{}
 }
 
 // Sample calculates a MachineSample for the current resource usage.
@@ -69,6 +55,12 @@ func (s *Sampler) Sample() (monibot.MachineSample, error) {
 		return sample, fmt.Errorf("cannot loadDiskActivity: %w", err)
 	}
 	sample.DiskReads, sample.DiskWrites = diskAct[0], diskAct[1]
+	// load net activity
+	netAct, err := s.loadNetActivity()
+	if err != nil {
+		return sample, fmt.Errorf("cannot loadNetActivity: %w", err)
+	}
+	sample.NetRecv, sample.NetSend = netAct[0], netAct[1]
 	// load local tstamp
 	sample.Tstamp = time.Now().UnixMilli()
 	return sample, nil
@@ -153,10 +145,10 @@ func (s *Sampler) loadDiskPercent() (int, error) {
 //	[1]=writes
 type diskActivity [2]int64
 
-// loadDiskReadWrites loads diskActivity since last invocation.
+// loadDiskActivity loads diskActivity since last invocation.
 func (s *Sampler) loadDiskActivity() (diskActivity, error) {
 	// load current disk stat
-	stat, err := loadDiskStat(s.diskDevices)
+	stat, err := loadDiskStat()
 	if err != nil {
 		return diskActivity{}, fmt.Errorf("cannot loadDiskStat: %w", err)
 	}
@@ -171,6 +163,32 @@ func (s *Sampler) loadDiskActivity() (diskActivity, error) {
 	reads := stat.read - lastStat.read
 	writes := stat.written - lastStat.written
 	return diskActivity{reads, writes}, nil
+}
+
+// netActivity hold number of bytes received and sent. It's used for sampling network activity.
+//
+//	[0]=recv
+//	[1]=send
+type netActivity [2]int64
+
+// loadNetActivity loads netActivity since last invocation.
+func (s *Sampler) loadNetActivity() (netActivity, error) {
+	// load current net stat
+	stat, err := loadNetStat()
+	if err != nil {
+		return netActivity{}, fmt.Errorf("cannot loadNetStat: %w", err)
+	}
+	// save stat for next time
+	lastStat := s.lastNetStat
+	s.lastNetStat = stat
+	// if we have no lastStat, we return zero
+	if lastStat.isZero() {
+		return netActivity{}, nil
+	}
+	// calc stat minus lastStat
+	recv := stat.recv - lastStat.recv
+	send := stat.send - lastStat.send
+	return netActivity{recv, send}, nil
 }
 
 // helper functions
@@ -274,6 +292,16 @@ func parseDiskPercent(text string) (int, error) {
 	return 0, fmt.Errorf("prefix \"total \" not found")
 }
 
+// cpuStat holds data for a cpu usage stat from /proc/stat.
+type cpuStat struct {
+	total int64
+	idle  int64
+}
+
+func (s cpuStat) isZero() bool {
+	return s.total == 0 && s.idle == 0
+}
+
 // loadCpuStat reads /proc/stat and parses it.
 func loadCpuStat() (cpuStat, error) {
 	// parse /proc/stat
@@ -322,24 +350,14 @@ func parseCpuStat(text string) (cpuStat, error) {
 	return cpuStat{}, fmt.Errorf("prefix \"cpu \" not found")
 }
 
-// cpuStat holds data for a cpu usage stat from /proc/stat.
-type cpuStat struct {
-	total int64
-	idle  int64
-}
-
-func (s cpuStat) isZero() bool {
-	return s.total == 0 && s.idle == 0
-}
-
 // loadDiskStat reads /proc/diskstats and parses it.
-func loadDiskStat(devices map[string]bool) (diskStat, error) {
+func loadDiskStat() (diskStat, error) {
 	filename := "/proc/diskstats"
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return diskStat{}, fmt.Errorf("cannot read %s: %w", filename, err)
 	}
-	stat, err := parseDiskStat(string(data), devices)
+	stat, err := parseDiskStat(string(data))
 	if err != nil {
 		return diskStat{}, fmt.Errorf("cannot parse %s: %w", filename, err)
 	}
@@ -348,13 +366,16 @@ func loadDiskStat(devices map[string]bool) (diskStat, error) {
 
 // parseDiskStat parses /proc/diskstats
 // See https://www.kernel.org/doc/Documentation/admin-guide/iostats.rst
-func parseDiskStat(text string, devices map[string]bool) (diskStat, error) {
+func parseDiskStat(text string) (diskStat, error) {
 	// 259       0 nvme0n1 348631 57325 49778168 51034 237722 390973 34542122 662471 0 262444 729800 0 0 0 0 14038 16295
 	// 259       1 nvme0n1p1 187 1000 13454 31 2 0 2 7 0 60 39 0 0 0 0 0 0
 	// 259       2 nvme0n1p2 348152 56277 49752186 50957 237639 388315 34512056 662230 0 262220 713187 0 0 0 0 0 0
+	//  12       3 sda 348631 57325 49778168 51034 237722 390973 34542122 662471 0 262444 729800 0 0 0 0 14038 16295
+	//  12       4 sda1 348631 57325 49778168 51034 237722 390973 34542122 662471 0 262444 729800 0 0 0 0 14038 16295
 	// ...
 	lines := strings.Split(text, "\n")
 	var stat diskStat
+	var sampledDevices []string
 	for _, line := range lines {
 		line = normalize(line)
 		toks := strings.Split(line, " ")
@@ -364,11 +385,11 @@ func parseDiskStat(text string, devices map[string]bool) (diskStat, error) {
 			"nvme0n1p2",        [2] device name
 			"362480",           [3] reads completed successfully
 			"45251",            [4] reads merged
-			"56219218",         [5] sectors read
+			"56219218",         [5] sectors read <------ want this
 			"50895",            [6] time spent reading (ms)
 			"169828",           [7] writes completed
 			"284438",           [8] writes merged
-			"31247016",         [9] sectors written
+			"31247016",         [9] sectors written <------ and this
 			"434359",          [10] time spent writing (ms)
 			"0",               [11] I/Os currently in progress
 			"241188",          [12] time spent doing I/Os (ms)
@@ -377,19 +398,33 @@ func parseDiskStat(text string, devices map[string]bool) (diskStat, error) {
 		if len(toks) < 14 {
 			continue
 		}
-		device := toks[2]
-		if !devices[device] {
+		device := normalize(toks[2])
+		// skip devices we're not interested in
+		goodDevice := strings.HasPrefix(device, "sd") || strings.HasPrefix(device, "nvme")
+		if !goodDevice {
 			continue
 		}
-		sread := toks[5]    // [5] sectors read
-		swritten := toks[9] // [9] sectors written
-		read, err := strconv.ParseInt(sread, 10, 64)
-		if err != nil {
-			return diskStat{}, fmt.Errorf("cannot parse read count %q: %w", sread, err)
+		// skip sub-devices
+		var deviceSampledBefore bool
+		for _, sampledDevice := range sampledDevices {
+			if strings.HasPrefix(device, sampledDevice) {
+				deviceSampledBefore = true
+			}
 		}
-		written, err := strconv.ParseInt(swritten, 10, 64)
+		if deviceSampledBefore {
+			continue
+		}
+		// sample this device
+		sampledDevices = append(sampledDevices, device)
+		tok := toks[5] // [5] sectors read
+		read, err := strconv.ParseInt(tok, 10, 64)
 		if err != nil {
-			return diskStat{}, fmt.Errorf("cannot parse write count %q: %w", swritten, err)
+			return diskStat{}, fmt.Errorf("cannot parse read count %q: %w", tok, err)
+		}
+		tok = toks[9] // [9] sectors written
+		written, err := strconv.ParseInt(tok, 10, 64)
+		if err != nil {
+			return diskStat{}, fmt.Errorf("cannot parse write count %q: %w", tok, err)
 		}
 		stat.read += read
 		stat.written += written
@@ -399,12 +434,78 @@ func parseDiskStat(text string, devices map[string]bool) (diskStat, error) {
 
 // diskStat holds read/write counters from /proc/diskstats.
 type diskStat struct {
-	read    int64 // number of sectors read since boot // TODO: this value may overflow
-	written int64 // number of sectors written since boot // TODO: this value may overflow
+	read    int64 // number of sectors read since boot // TODO these might overflow
+	written int64 // number of sectors written since boot // TODO these might overflow
 }
 
 func (s diskStat) isZero() bool {
 	return s.read == 0 && s.written == 0
+}
+
+// loadNetStat reads /proc/net/dev and parses it.
+func loadNetStat() (netStat, error) {
+	filename := "/proc/net/dev"
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return netStat{}, fmt.Errorf("cannot read %s: %w", filename, err)
+	}
+	stat, err := parseNetStat(string(data))
+	if err != nil {
+		return netStat{}, fmt.Errorf("cannot parse %s: %w", filename, err)
+	}
+	return stat, nil
+}
+
+// parseNetStat parses /proc/net/dev
+func parseNetStat(text string) (netStat, error) {
+	// Inter-|   Receive                                                      |  Transmit
+	//  face |       bytes packets errs  drop fifo frame compressed multicast |    bytes packets errs drop fifo colls carrier compressed
+	//     [0]         [1]     [2]  [3]   [4]  [5]   [6]        [7]       [8]        [9]
+	//     lo:   117864359   32173    0     0    0     0          0         0  117864359   32173    0    0    0     0       0          0
+	// enp4s0:    21640725   46246    0 13520    0     0          0      1053   13613968   31281    0    0    0     0       0          0
+	// wlp0s20f3:        1       2    3     4    5     6          7         8          9      10   11   12   13    14      15         16
+	lines := strings.Split(text, "\n")
+	var stat netStat
+	for _, line := range lines {
+		line = normalize(line)
+		toks := strings.Split(line, " ")
+		if len(toks) < 10 {
+			continue
+		}
+		device := normalize(toks[0])
+		// skip non-device lines, e.g. header lines
+		if !strings.HasSuffix(device, ":") {
+			continue
+		}
+		// skip devices we are not interested in
+		goodDevice := strings.HasPrefix(device, "e") || strings.HasPrefix(device, "w")
+		if !goodDevice {
+			continue
+		}
+		tok := toks[1]
+		recv, err := strconv.ParseInt(tok, 10, 64)
+		if err != nil {
+			return netStat{}, fmt.Errorf("cannot parse recv %q: %w", tok, err)
+		}
+		tok = toks[9]
+		send, err := strconv.ParseInt(tok, 10, 64)
+		if err != nil {
+			return netStat{}, fmt.Errorf("cannot parse send %q: %w", tok, err)
+		}
+		stat.recv += recv
+		stat.send += send
+	}
+	return stat, nil
+}
+
+// netStat holds read/write counters from /proc/net/dev.
+type netStat struct {
+	recv int64 // number of bytes received since device startup // TODO these might overflow
+	send int64 // number of bytes sent since device startup // TODO these might overflow
+}
+
+func (s netStat) isZero() bool {
+	return s.recv == 0 && s.send == 0
 }
 
 // percentOf calculates percentage of used compared to total.

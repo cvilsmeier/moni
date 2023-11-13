@@ -1,6 +1,4 @@
-dist.sh
-clean.sh
-upload.sh
+*.sh
 cmd/
 bin/
 _dist/

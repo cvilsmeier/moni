@@ -22,37 +22,31 @@ import (
 )
 
 const (
-	urlEnvKey  = "MONI_URL"
+	urlEnvKey  = "MONIBOT_URL"
 	urlFlag    = "url"
 	defaultUrl = "https://monibot.io"
 
-	apiKeyEnvKey  = "MONI_API_KEY"
+	apiKeyEnvKey  = "MONIBOT_API_KEY"
 	apiKeyFlag    = "apiKey"
 	defaultApiKey = ""
 
-	verboseEnvKey     = "MONI_VERBOSE"
+	verboseEnvKey     = "MONIBOT_VERBOSE"
 	verboseFlag       = "v"
 	defaultVerbose    = false
 	defaultVerboseStr = "false"
 
-	trialsEnvKey     = "MONI_TRIALS"
+	trialsEnvKey     = "MONIBOT_TRIALS"
 	trialsFlag       = "trials"
 	defaultTrials    = 12
 	defaultTrialsStr = "12"
 
-	delayEnvKey     = "MONI_DELAY"
-	delayFlag       = "delay"
-	defaultDelay    = 5 * time.Second
-	defaultDelayStr = "5s"
+	delayEnvKey  = "MONIBOT_DELAY"
+	delayFlag    = "delay"
+	defaultDelay = 5 * time.Second
 
-	sampleIntervalEnvKey     = "MONI_SAMPLE_INTERVAL"
-	sampleIntervalFlag       = "sampleInterval"
-	defaultSampleInterval    = 5 * time.Minute
-	defaultSampleIntervalStr = "5m"
-
-	disksEnvKey  = "MONI_DISKS"
-	disksFlag    = "disks"
-	defaultDisks = ""
+	sampleIntervalEnvKey  = "MONIBOT_SAMPLE_INTERVAL"
+	sampleIntervalFlag    = "sampleInterval"
+	defaultSampleInterval = 5 * time.Minute
 )
 
 func usage() {
@@ -81,23 +75,13 @@ func usage() {
 	internal.Print("        You can set this also via environment variable %s.", trialsEnvKey)
 	internal.Print("")
 	internal.Print("    -%s", delayFlag)
-	internal.Print("        Delay between trials, default is %v.", defaultDelayStr)
+	internal.Print("        Delay between trials, default is %v.", fmtDuration(defaultDelay))
 	internal.Print("        You can set this also via environment variable %s.", delayEnvKey)
 	internal.Print("")
 	internal.Print("    -%s", sampleIntervalFlag)
-	internal.Print("        Machine sample interval, default is %v.", defaultSampleIntervalStr)
+	internal.Print("        Machine sample interval, default is %v.", fmtDuration(defaultSampleInterval))
 	internal.Print("        You can set this also via environment variable %s.", sampleIntervalEnvKey)
 	internal.Print("        This flag is only relevant for the 'sample' command.")
-	internal.Print("")
-	internal.Print("    -%s", disksFlag)
-	internal.Print("        Machine sample disk device names, default is %v.", defaultDisks)
-	internal.Print("        You can set this also via environment variable %s.", disksEnvKey)
-	internal.Print("        This flag is only relevant for the 'sample' command.")
-	internal.Print("        It specifies the device name(s) of the disks (or partitions)")
-	internal.Print("        that should be included in machine sampling.")
-	internal.Print("        If it's empty then no disk stats are sampled.")
-	internal.Print("        This flag can be a single disk name, e.g. 'sda' or multiple")
-	internal.Print("        comma-separated disk names, e.g. 'sda,sdb' (spaces must be avoided)")
 	internal.Print("")
 	internal.Print("    -%s", verboseFlag)
 	internal.Print("        Verbose output, default is %v.", defaultVerboseStr)
@@ -114,11 +98,8 @@ func usage() {
 	internal.Print("    watchdog <watchdogId>")
 	internal.Print("        Get watchdog by id.")
 	internal.Print("")
-	internal.Print("    heartbeat <watchdogId> [interval]")
+	internal.Print("    heartbeat <watchdogId>")
 	internal.Print("        Send a heartbeat.")
-	internal.Print("        If interval is specified, moni will keep sending heartbeats")
-	internal.Print("        in the background. Min. interval is 1m. If interval is left")
-	internal.Print("        out, moni will send one heartbeat and then exit.")
 	internal.Print("")
 	internal.Print("    machines")
 	internal.Print("        List machines.")
@@ -132,7 +113,7 @@ func usage() {
 	internal.Print("        and commands (/usr/bin/free, /usr/bin/df, etc.) to calculate")
 	internal.Print("        resource usage. It currently supports linux only.")
 	internal.Print("        Moni will stay in background and keep sampling in specified")
-	internal.Print("        sample interval, default %s, see flag 'sampleInterval.", defaultSampleIntervalStr)
+	internal.Print("        sample interval, default %s, see flag 'sampleInterval.", fmtDuration(defaultSampleInterval))
 	internal.Print("")
 	internal.Print("    metrics")
 	internal.Print("        List metrics.")
@@ -165,6 +146,7 @@ func usage() {
 	internal.Print("    1 error")
 	internal.Print("    2 wrong user input")
 	internal.Print("")
+	// end usage
 }
 
 func main() {
@@ -195,7 +177,7 @@ func main() {
 	// -delay 5s
 	delayStr := os.Getenv(delayEnvKey)
 	if delayStr == "" {
-		delayStr = defaultDelayStr
+		delayStr = fmtDuration(defaultDelay)
 	}
 	delay, err := time.ParseDuration(delayStr)
 	if err != nil {
@@ -205,19 +187,13 @@ func main() {
 	// -sampleInterval 5m
 	sampleIntervalStr := os.Getenv(sampleIntervalEnvKey)
 	if sampleIntervalStr == "" {
-		sampleIntervalStr = defaultSampleIntervalStr
+		sampleIntervalStr = fmtDuration(defaultSampleInterval)
 	}
 	sampleInterval, err := time.ParseDuration(sampleIntervalStr)
 	if err != nil {
 		fatal(2, "cannot parse sampleInterval %q: %s", sampleIntervalStr, err)
 	}
 	flag.DurationVar(&sampleInterval, sampleIntervalFlag, sampleInterval, "")
-	// -disks sda,sdb
-	disks := os.Getenv(disksEnvKey)
-	if disks == "" {
-		disks = defaultDisks
-	}
-	flag.StringVar(&disks, disksFlag, disks, "")
 	// -v
 	verboseStr := os.Getenv(verboseEnvKey)
 	if verboseStr == "" {
@@ -238,9 +214,8 @@ func main() {
 		internal.Print("url             %v", url)
 		internal.Print("apiKey          %v", apiKey)
 		internal.Print("trials          %v", trials)
-		internal.Print("delay           %v", delay)
-		internal.Print("sampleInterval  %v", sampleInterval)
-		internal.Print("disks           %v", disks)
+		internal.Print("delay           %v", fmtDuration(delay))
+		internal.Print("sampleInterval  %v", fmtDuration(sampleInterval))
 		internal.Print("verbose         %v", verbose)
 		os.Exit(0)
 	case "version":
@@ -279,20 +254,14 @@ func main() {
 		fatal(2, "invalid sampleInterval %s, must be <= %s", sampleInterval, maxSampleInterval)
 	}
 	// init monibot Api
-	logger := monibot.NewDiscardLogger()
+	var options monibot.ApiOptions
 	if verbose {
-		logger = monibot.NewLogLogger(log.Default())
+		options.Logger = &ApiLogger{}
 	}
-	sender := monibot.NewSenderWithOptions(apiKey, monibot.SenderOptions{
-		Logger:     logger,
-		MonibotUrl: url,
-	})
-	retrySender := monibot.NewRetrySenderWithOptions(sender, monibot.RetrySenderOptions{
-		Logger: logger,
-		Trials: trials,
-		Delay:  delay,
-	})
-	api := monibot.NewApiWithSender(retrySender)
+	options.MonibotUrl = url
+	options.Trials = trials
+	options.Delay = delay
+	api := monibot.NewApiWithOptions(apiKey, options)
 	// execute API commands
 	switch command {
 	case "ping":
@@ -320,39 +289,14 @@ func main() {
 		}
 		internal.PrintWatchdogs([]monibot.Watchdog{watchdog})
 	case "heartbeat":
-		// moni heartbeat <watchdogId> [interval]
+		// moni heartbeat <watchdogId>
 		watchdogId := flag.Arg(1)
 		if watchdogId == "" {
 			fatal(2, "empty watchdogId")
 		}
-		var interval time.Duration
-		intervalStr := flag.Arg(2)
-		if intervalStr != "" {
-			interval, err = time.ParseDuration(intervalStr)
-			if err != nil {
-				fatal(2, "cannot parse interval %q: %s", intervalStr, err)
-			}
-			const minInterval = 1 * time.Minute
-			if interval < minInterval {
-				fatal(2, "invalid interval %s: must be >= %s", interval, minInterval)
-			}
-		}
-		if interval == 0 {
-			err := api.PostWatchdogHeartbeat(watchdogId)
-			if err != nil {
-				fatal(1, "%s", err)
-			}
-		} else {
-			logger.Debug("will send heartbeats in background")
-			for {
-				// send
-				err := api.PostWatchdogHeartbeat(watchdogId)
-				if err != nil {
-					internal.Print("WARNING: cannot POST heartbeat: %s", err)
-				}
-				// sleep
-				time.Sleep(interval)
-			}
+		err := api.PostWatchdogHeartbeat(watchdogId)
+		if err != nil {
+			fatal(1, "%s", err)
 		}
 	case "machines":
 		// moni machines
@@ -378,18 +322,14 @@ func main() {
 		if machineId == "" {
 			fatal(2, "empty machineId")
 		}
-		var diskDevices []string
-		if disks != "" {
-			diskDevices = strings.Split(disks, ",")
-		}
-		sampler := internal.NewSampler(diskDevices)
+		sampler := internal.NewSampler()
 		// we must warm up the sampler first
 		_, err := sampler.Sample()
 		if err != nil {
 			internal.Print("WARNING: cannot sample: %s", err)
 		}
 		// entering sampling loop
-		logger.Debug("will send samples in background every %s", sampleInterval)
+		log.Printf("will send samples in background every %s", sampleInterval)
 		for {
 			// sleep
 			time.Sleep(sampleInterval)
@@ -466,4 +406,25 @@ func main() {
 func fatal(exitCode int, f string, a ...any) {
 	fmt.Printf(f+"\n", a...)
 	os.Exit(exitCode)
+}
+
+func fmtDuration(d time.Duration) string {
+	if d == 0 {
+		return "0s"
+	}
+	s := d.String()
+	if strings.HasSuffix(s, "m0s") {
+		s = strings.TrimSuffix(s, "0s")
+	}
+	if strings.HasSuffix(s, "h0m") {
+		s = strings.TrimSuffix(s, "0m")
+	}
+	return s
+}
+
+// ApiLogger logs monibot debug messages
+type ApiLogger struct{}
+
+func (l *ApiLogger) Debug(format string, args ...any) {
+	log.Printf("[MONIBOT] "+format, args...)
 }

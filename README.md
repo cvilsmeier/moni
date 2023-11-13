@@ -1,30 +1,44 @@
-# moni
+# moni - A command line tool for Monibot - Web App monitoring for developers
 
 [![GoDoc Reference](https://godoc.org/github.com/cvilsmeier/moni?status.svg)](http://godoc.org/github.com/cvilsmeier/moni)
 [![Build Status](https://github.com/cvilsmeier/moni/actions/workflows/go-linux.yml/badge.svg)](https://github.com/cvilsmeier/moni/actions/workflows/go-linux.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A command line tool for https://monibot.io
+A command line tool for Monibot - Web App monitoring for developers 
+https://monibot.io
 
 
 ## Download
 
-Download a pre-built Linux/Amd64 binary from here:
+Download a pre-built linux/amd64 binary from here:
 https://github.com/cvilsmeier/moni/releases/latest
 
 
 ## Install
 
-Needs Go 1.20 or higher, download from https://go.dev/
+If you do not want to download a pre-built binary, you
+can install moni from the command line. You need
+Go 1.20 or higher, see https://go.dev/
 
 ```
 $ go install github.com/cvilsmeier/moni
 ```
 
 
-## Usage
+## Build
 
-Moni supports many commands, list them all with:
+You can build moni from the command line. You need
+Go 1.20 or higher. For installing Go, see https://go.dev/
+
+```
+$ git clone https://github.com/cvilsmeier/moni
+$ cd moni/
+$ go build .
+$ ./moni
+```
+
+
+## Usage
 
 ```
 $ moni help
@@ -47,7 +61,7 @@ Flags
         You can find your API Key in your profile on https://monibot.io.
         Note: For security, we recommend that you specify the API Key
         via MONIBOT_API_KEY, and not via -apiKey flag. The flag will show up in
-        'ps aux' outputs and can so be eavesdropped.
+        'ps aux' outputs and can be eavesdropped.
 
     -trials
         Max. Send trials, default is 12.
@@ -56,6 +70,11 @@ Flags
     -delay
         Delay between trials, default is 5s.
         You can set this also via environment variable MONIBOT_DELAY.
+
+    -sampleInterval
+        Machine sample interval, default is 5m.
+        You can set this also via environment variable MONIBOT_SAMPLE_INTERVAL.
+        This flag is only relevant for the 'sample' command.
 
     -v
         Verbose output, default is false.
@@ -72,11 +91,8 @@ Commands
     watchdog <watchdogId>
         Get watchdog by id.
 
-    heartbeat <watchdogId> [interval]
+    heartbeat <watchdogId>
         Send a heartbeat.
-        If interval is specified, moni will keep sending heartbeats
-        in the background. Min. interval is 1m. If interval is left
-        out, moni will send one heartbeat and then exit.
 
     machines
         List machines.
@@ -84,14 +100,13 @@ Commands
     machine <machineId>
         Get machine by id.
 
-    sample <machineId> [interval]
+    sample <machineId>
         Send resource usage (load/cpu/mem/disk) samples for machine.
-        Moni consults various files (/proc/loadavg, /proc/cpuinfo)
-        and commands (free, df) to calculate resource usage.
-        It currently supports linux only.
-        If interval is specified, moni will keep sampling in
-        the background. Min. interval is 1m. If interval is left
-        out, moni will send one sample and then exit.
+        Moni consults various files (/proc/loadavg, /proc/cpuinfo, etc.)
+        and commands (/usr/bin/free, /usr/bin/df, etc.) to calculate
+        resource usage. It currently supports linux only.
+        Moni will stay in background and keep sampling in specified
+        sample interval, default 5m, see flag 'sampleInterval.
 
     metrics
         List metrics.
@@ -123,6 +138,7 @@ Exit Codes
     0 ok
     1 error
     2 wrong user input
+
 ```
 
 
@@ -131,6 +147,7 @@ Exit Codes
 ### v0.0.1
 
 - add disk read/write sampling
+- add network recv/send sampling
 
 ### v0.0.0
 
