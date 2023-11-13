@@ -4,7 +4,7 @@ Monibot REST API, see https://monibot.io for details.
 It supports a number of commands.
 To get a list of supported commands, run
 
-	$ moni
+	$ moni help
 */
 package main
 
@@ -20,6 +20,9 @@ import (
 	"github.com/cvilsmeier/moni/internal"
 	"github.com/cvilsmeier/monibot-go"
 )
+
+// Version is the moni tool version
+const Version = "v0.0.2"
 
 const (
 	urlEnvKey  = "MONIBOT_URL"
@@ -43,109 +46,104 @@ const (
 	delayEnvKey  = "MONIBOT_DELAY"
 	delayFlag    = "delay"
 	defaultDelay = 5 * time.Second
-
-	sampleIntervalEnvKey  = "MONIBOT_SAMPLE_INTERVAL"
-	sampleIntervalFlag    = "sampleInterval"
-	defaultSampleInterval = 5 * time.Minute
 )
 
 func usage() {
-	internal.Print("Moni - A command line tool for https://monibot.io")
-	internal.Print("")
-	internal.Print("Usage")
-	internal.Print("")
-	internal.Print("    moni [flags] command")
-	internal.Print("")
-	internal.Print("Flags")
-	internal.Print("")
-	internal.Print("    -%s", urlFlag)
-	internal.Print("        Monibot URL, default is %q.", defaultUrl)
-	internal.Print("        You can set this also via environment variable %s.", urlEnvKey)
-	internal.Print("")
-	internal.Print("    -%s", apiKeyFlag)
-	internal.Print("        Monibot API Key, default is %q.", defaultApiKey)
-	internal.Print("        You can set this also via environment variable %s (recommended).", apiKeyEnvKey)
-	internal.Print("        You can find your API Key in your profile on https://monibot.io.")
-	internal.Print("        Note: For security, we recommend that you specify the API Key")
-	internal.Print("        via %s, and not via -%s flag. The flag will show up in", apiKeyEnvKey, apiKeyFlag)
-	internal.Print("        'ps aux' outputs and can be eavesdropped.")
-	internal.Print("")
-	internal.Print("    -%s", trialsFlag)
-	internal.Print("        Max. Send trials, default is %v.", defaultTrials)
-	internal.Print("        You can set this also via environment variable %s.", trialsEnvKey)
-	internal.Print("")
-	internal.Print("    -%s", delayFlag)
-	internal.Print("        Delay between trials, default is %v.", fmtDuration(defaultDelay))
-	internal.Print("        You can set this also via environment variable %s.", delayEnvKey)
-	internal.Print("")
-	internal.Print("    -%s", sampleIntervalFlag)
-	internal.Print("        Machine sample interval, default is %v.", fmtDuration(defaultSampleInterval))
-	internal.Print("        You can set this also via environment variable %s.", sampleIntervalEnvKey)
-	internal.Print("        This flag is only relevant for the 'sample' command.")
-	internal.Print("")
-	internal.Print("    -%s", verboseFlag)
-	internal.Print("        Verbose output, default is %v.", defaultVerboseStr)
-	internal.Print("        You can set this also via environment variable %s ('true' or 'false').", verboseEnvKey)
-	internal.Print("")
-	internal.Print("Commands")
-	internal.Print("")
-	internal.Print("    ping")
-	internal.Print("        Ping the Monibot API.")
-	internal.Print("")
-	internal.Print("    watchdogs")
-	internal.Print("        List watchdogs.")
-	internal.Print("")
-	internal.Print("    watchdog <watchdogId>")
-	internal.Print("        Get watchdog by id.")
-	internal.Print("")
-	internal.Print("    heartbeat <watchdogId>")
-	internal.Print("        Send a heartbeat.")
-	internal.Print("")
-	internal.Print("    machines")
-	internal.Print("        List machines.")
-	internal.Print("")
-	internal.Print("    machine <machineId>")
-	internal.Print("        Get machine by id.")
-	internal.Print("")
-	internal.Print("    sample <machineId>")
-	internal.Print("        Send resource usage (load/cpu/mem/disk) samples for machine.")
-	internal.Print("        Moni consults various files (/proc/loadavg, /proc/cpuinfo, etc.)")
-	internal.Print("        and commands (/usr/bin/free, /usr/bin/df, etc.) to calculate")
-	internal.Print("        resource usage. It currently supports linux only.")
-	internal.Print("        Moni will stay in background and keep sampling in specified")
-	internal.Print("        sample interval, default %s, see flag 'sampleInterval.", fmtDuration(defaultSampleInterval))
-	internal.Print("")
-	internal.Print("    metrics")
-	internal.Print("        List metrics.")
-	internal.Print("")
-	internal.Print("    metric <metricId>")
-	internal.Print("        Get and print metric info.")
-	internal.Print("")
-	internal.Print("    inc <metricId> <value>")
-	internal.Print("        Increment a Counter metric.")
-	internal.Print("        Value must be a non-negative 64-bit integer value.")
-	internal.Print("")
-	internal.Print("    set <metricId> <value>")
-	internal.Print("        Set a Gauge metric.")
-	internal.Print("        Value must be a non-negative 64-bit integer value.")
-	internal.Print("")
-	internal.Print("    config")
-	internal.Print("        Show config values.")
-	internal.Print("")
-	internal.Print("    version")
-	internal.Print("        Show moni program version.")
-	internal.Print("")
-	internal.Print("    sdk-version")
-	internal.Print("        Show the monibot-go SDK version moni was built with.")
-	internal.Print("")
-	internal.Print("    help")
-	internal.Print("        Show this help page.")
-	internal.Print("")
-	internal.Print("Exit Codes")
-	internal.Print("    0 ok")
-	internal.Print("    1 error")
-	internal.Print("    2 wrong user input")
-	internal.Print("")
+	prt("Moni - A command line tool for https://monibot.io")
+	prt("")
+	prt("Usage")
+	prt("")
+	prt("    moni [flags] command")
+	prt("")
+	prt("Flags")
+	prt("")
+	prt("    -%s", urlFlag)
+	prt("        Monibot URL, default is %q.", defaultUrl)
+	prt("        You can set this also via environment variable %s.", urlEnvKey)
+	prt("")
+	prt("    -%s", apiKeyFlag)
+	prt("        Monibot API Key, default is %q.", defaultApiKey)
+	prt("        You can set this also via environment variable %s (recommended).", apiKeyEnvKey)
+	prt("        You can find your API Key in your profile on https://monibot.io.")
+	prt("        Note: For security, we recommend that you specify the API Key")
+	prt("        via %s, and not via -%s flag. The flag will show up in", apiKeyEnvKey, apiKeyFlag)
+	prt("        'ps aux' outputs and can be eavesdropped.")
+	prt("")
+	prt("    -%s", trialsFlag)
+	prt("        Max. Send trials, default is %v.", defaultTrials)
+	prt("        You can set this also via environment variable %s.", trialsEnvKey)
+	prt("")
+	prt("    -%s", delayFlag)
+	prt("        Delay between trials, default is %v.", fmtDuration(defaultDelay))
+	prt("        You can set this also via environment variable %s.", delayEnvKey)
+	prt("")
+	prt("    -%s", verboseFlag)
+	prt("        Verbose output, default is %v.", defaultVerboseStr)
+	prt("        You can set this also via environment variable %s ('true' or 'false').", verboseEnvKey)
+	prt("")
+	prt("Commands")
+	prt("")
+	prt("    ping")
+	prt("        Ping the Monibot API. If an error occurs, moni will print")
+	prt("        that error. It it succeeds, moni will print nothing.")
+	prt("")
+	prt("    watchdogs")
+	prt("        List heartbeat watchdogs.")
+	prt("")
+	prt("    watchdog <watchdogId>")
+	prt("        Get heartbeat watchdog by id.")
+	prt("")
+	prt("    beat <watchdogId> [interval]")
+	prt("        Send a heartbeat. If interval is not specified,")
+	prt("        moni sends one heartbeat and exits. If interval is")
+	prt("        specified, moni will stay in the background and send")
+	prt("        heartbeats in that interval")
+	prt("")
+	prt("    machines")
+	prt("        List machines.")
+	prt("")
+	prt("    machine <machineId>")
+	prt("        Get machine by id.")
+	prt("")
+	prt("    sample <machineId> <interval>")
+	prt("        Send resource usage (load/cpu/mem/disk) samples for machine.")
+	prt("        Moni consults various files (/proc/loadavg, /proc/cpuinfo, etc.)")
+	prt("        and commands (/usr/bin/free, /usr/bin/df, etc.) to calculate")
+	prt("        resource usage. Therefore it currently supports linux only.")
+	prt("        Moni will stay in background and keep sampling in specified")
+	prt("        interval.")
+	prt("")
+	prt("    metrics")
+	prt("        List metrics.")
+	prt("")
+	prt("    metric <metricId>")
+	prt("        Get and print metric info.")
+	prt("")
+	prt("    inc <metricId> <value>")
+	prt("        Increment a Counter metric.")
+	prt("        Value must be a non-negative 64-bit integer value.")
+	prt("")
+	prt("    set <metricId> <value>")
+	prt("        Set a Gauge metric.")
+	prt("        Value must be a non-negative 64-bit integer value.")
+	prt("")
+	prt("    config")
+	prt("        Show config values.")
+	prt("")
+	prt("    version")
+	prt("        Show moni program version.")
+	prt("")
+	prt("    sdk-version")
+	prt("        Show the monibot-go SDK version moni was built with.")
+	prt("")
+	prt("    help")
+	prt("        Show this help page.")
+	prt("")
+	prt("Exit Codes")
+	prt("    0 ok")
+	prt("    1 error")
+	prt("    2 wrong user input")
+	prt("")
 	// end usage
 }
 
@@ -184,16 +182,6 @@ func main() {
 		fatal(2, "cannot parse delay %q: %s", delayStr, err)
 	}
 	flag.DurationVar(&delay, delayFlag, delay, "")
-	// -sampleInterval 5m
-	sampleIntervalStr := os.Getenv(sampleIntervalEnvKey)
-	if sampleIntervalStr == "" {
-		sampleIntervalStr = fmtDuration(defaultSampleInterval)
-	}
-	sampleInterval, err := time.ParseDuration(sampleIntervalStr)
-	if err != nil {
-		fatal(2, "cannot parse sampleInterval %q: %s", sampleIntervalStr, err)
-	}
-	flag.DurationVar(&sampleInterval, sampleIntervalFlag, sampleInterval, "")
 	// -v
 	verboseStr := os.Getenv(verboseEnvKey)
 	if verboseStr == "" {
@@ -204,6 +192,9 @@ func main() {
 	// parse flags
 	flag.Usage = usage
 	flag.Parse()
+	// are we dev?
+	_, err = os.Stat("dev")
+	dev := err == nil
 	// execute non-API commands
 	command := flag.Arg(0)
 	switch command {
@@ -211,18 +202,17 @@ func main() {
 		usage()
 		os.Exit(0)
 	case "config":
-		internal.Print("url             %v", url)
-		internal.Print("apiKey          %v", apiKey)
-		internal.Print("trials          %v", trials)
-		internal.Print("delay           %v", fmtDuration(delay))
-		internal.Print("sampleInterval  %v", fmtDuration(sampleInterval))
-		internal.Print("verbose         %v", verbose)
+		prt("url             %v", url)
+		prt("apiKey          %v", apiKey)
+		prt("trials          %v", trials)
+		prt("delay           %v", fmtDuration(delay))
+		prt("verbose         %v", verbose)
 		os.Exit(0)
 	case "version":
-		internal.Print("moni %s", internal.Version)
+		prt("moni %s", Version)
 		os.Exit(0)
 	case "sdk-version":
-		internal.Print("monibot-go %s", monibot.Version)
+		prt("monibot-go %s", monibot.Version)
 		os.Exit(0)
 	}
 	// validate flags
@@ -245,13 +235,6 @@ func main() {
 		fatal(2, "invalid delay %s, must be >= %s", delay, minDelay)
 	} else if delay > maxDelay {
 		fatal(2, "invalid delay %s, must be <= %s", delay, maxDelay)
-	}
-	const minSampleInterval = 1 * time.Minute
-	const maxSampleInterval = 24 * time.Hour
-	if sampleInterval < minSampleInterval {
-		fatal(2, "invalid sampleInterval %s, must be >= %s", sampleInterval, minSampleInterval)
-	} else if sampleInterval > maxSampleInterval {
-		fatal(2, "invalid sampleInterval %s, must be <= %s", sampleInterval, maxSampleInterval)
 	}
 	// init monibot Api
 	var options monibot.ApiOptions
@@ -276,7 +259,7 @@ func main() {
 		if err != nil {
 			fatal(1, "%s", err)
 		}
-		internal.PrintWatchdogs(watchdogs)
+		printWatchdogs(watchdogs)
 	case "watchdog":
 		// moni watchdog <watchdogId>
 		watchdogId := flag.Arg(1)
@@ -287,16 +270,43 @@ func main() {
 		if err != nil {
 			fatal(1, "%s", err)
 		}
-		internal.PrintWatchdogs([]monibot.Watchdog{watchdog})
-	case "heartbeat":
-		// moni heartbeat <watchdogId>
+		printWatchdogs([]monibot.Watchdog{watchdog})
+	case "beat":
+		// moni beat <watchdogId> [interval]
 		watchdogId := flag.Arg(1)
 		if watchdogId == "" {
 			fatal(2, "empty watchdogId")
 		}
+		var interval time.Duration
+		intervalStr := flag.Arg(2)
+		if intervalStr != "" {
+			interval, err = time.ParseDuration(intervalStr)
+			if err != nil {
+				fatal(2, "cannot parse interval %q: %s", intervalStr, err)
+			}
+			const minInterval = 1 * time.Minute
+			if interval < minInterval && !dev {
+				fatal(2, "invalid interval %s, must be >= %s", interval, minInterval)
+			}
+		}
+		if interval > 0 {
+			log.Printf("will send heartbeats in background every %s", interval)
+		}
 		err := api.PostWatchdogHeartbeat(watchdogId)
 		if err != nil {
-			fatal(1, "%s", err)
+			fatal(1, "cannot send heartbeat: %s", err)
+		}
+		if interval > 0 {
+			// enter heartbeat loop
+			for {
+				// sleep
+				time.Sleep(interval)
+				// send
+				err := api.PostWatchdogHeartbeat(watchdogId)
+				if err != nil {
+					prt("WARNING: cannot send heartbeat: %s", err)
+				}
+			}
 		}
 	case "machines":
 		// moni machines
@@ -304,7 +314,7 @@ func main() {
 		if err != nil {
 			fatal(1, "%s", err)
 		}
-		internal.PrintMachines(machines)
+		printMachines(machines)
 	case "machine":
 		// moni machine <machineId>
 		machineId := flag.Arg(1)
@@ -315,32 +325,44 @@ func main() {
 		if err != nil {
 			fatal(1, "%s", err)
 		}
-		internal.PrintMachines([]monibot.Machine{machine})
+		printMachines([]monibot.Machine{machine})
 	case "sample":
-		// moni sample <machineId>
+		// moni sample <machineId> <interval>
 		machineId := flag.Arg(1)
 		if machineId == "" {
 			fatal(2, "empty machineId")
 		}
+		intervalStr := flag.Arg(2)
+		if intervalStr == "" {
+			fatal(2, "empty interval")
+		}
+		interval, err := time.ParseDuration(intervalStr)
+		if err != nil {
+			fatal(2, "cannot parse interval %q: %s", intervalStr, err)
+		}
+		const minInterval = 1 * time.Minute
+		if interval < minInterval && !dev {
+			fatal(2, "invalid interval %s, must be >= %s", interval, minInterval)
+		}
 		sampler := internal.NewSampler()
 		// we must warm up the sampler first
-		_, err := sampler.Sample()
+		_, err = sampler.Sample()
 		if err != nil {
-			internal.Print("WARNING: cannot sample: %s", err)
+			fatal(1, "cannot sample: %s", err)
 		}
 		// entering sampling loop
-		log.Printf("will send samples in background every %s", sampleInterval)
+		log.Printf("will send samples in background every %s", interval)
 		for {
 			// sleep
-			time.Sleep(sampleInterval)
+			time.Sleep(interval)
 			// sample
 			sample, err := sampler.Sample()
 			if err != nil {
-				internal.Print("WARNING: cannot sample: %s", err)
+				prt("WARNING: cannot sample: %s", err)
 			}
 			err = api.PostMachineSample(machineId, sample)
 			if err != nil {
-				internal.Print("WARNING: cannot POST sample: %s", err)
+				prt("WARNING: cannot POST sample: %s", err)
 			}
 		}
 	case "metrics":
@@ -349,7 +371,7 @@ func main() {
 		if err != nil {
 			fatal(1, "%s", err)
 		}
-		internal.PrintMetrics(metrics)
+		printMetrics(metrics)
 	case "metric":
 		// moni metric <metricId>
 		metricId := flag.Arg(1)
@@ -360,7 +382,7 @@ func main() {
 		if err != nil {
 			fatal(1, "%s", err)
 		}
-		internal.PrintMetrics([]monibot.Metric{metric})
+		printMetrics([]monibot.Metric{metric})
 	case "inc":
 		// moni inc <metricId> <value>
 		metricId := flag.Arg(1)
@@ -420,6 +442,35 @@ func fmtDuration(d time.Duration) string {
 		s = strings.TrimSuffix(s, "0m")
 	}
 	return s
+}
+
+// printWatchdogs prints watchdogs.
+func printWatchdogs(watchdogs []monibot.Watchdog) {
+	prt("%-35s | %-25s | %s", "Id", "Name", "IntervalMillis")
+	for _, watchdog := range watchdogs {
+		prt("%-35s | %-25s | %d", watchdog.Id, watchdog.Name, watchdog.IntervalMillis)
+	}
+}
+
+// printMachines prints machines.
+func printMachines(machines []monibot.Machine) {
+	prt("%-35s | %s", "Id", "Name")
+	for _, machine := range machines {
+		prt("%-35s | %s", machine.Id, machine.Name)
+	}
+}
+
+// printMetrics prints metrics.
+func printMetrics(metrics []monibot.Metric) {
+	prt("%-35s | %-25s | %s", "Id", "Name", "Type")
+	for _, metric := range metrics {
+		prt("%-35s | %-25s | %d", metric.Id, metric.Name, metric.Type)
+	}
+}
+
+// prt prints a line to stdout.
+func prt(f string, a ...any) {
+	fmt.Printf(f+"\n", a...)
 }
 
 // ApiLogger logs monibot debug messages

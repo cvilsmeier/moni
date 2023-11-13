@@ -152,7 +152,7 @@ Exit Codes
 
 ### v0.0.2
 
-- update monibot-go
+- change command names and interval handling
 
 ### v0.0.1
 
