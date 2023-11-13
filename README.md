@@ -1,4 +1,4 @@
-# moni - A command line tool for Monibot - Web App monitoring for developers
+# moni - A command line tool for Monibot
 
 [![GoDoc Reference](https://godoc.org/github.com/cvilsmeier/moni?status.svg)](http://godoc.org/github.com/cvilsmeier/moni)
 [![Build Status](https://github.com/cvilsmeier/moni/actions/workflows/go-linux.yml/badge.svg)](https://github.com/cvilsmeier/moni/actions/workflows/go-linux.yml)
