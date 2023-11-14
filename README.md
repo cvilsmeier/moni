@@ -77,11 +77,6 @@ Flags
         Delay between trials, default is 5s.
         You can set this also via environment variable MONIBOT_DELAY.
 
-    -sampleInterval
-        Machine sample interval, default is 5m.
-        You can set this also via environment variable MONIBOT_SAMPLE_INTERVAL.
-        This flag is only relevant for the 'sample' command.
-
     -v
         Verbose output, default is false.
         You can set this also via environment variable MONIBOT_VERBOSE ('true' or 'false').
@@ -89,16 +84,20 @@ Flags
 Commands
 
     ping
-        Ping the Monibot API.
+        Ping the Monibot API. If an error occurs, moni will print
+        that error. It it succeeds, moni will print nothing.
 
     watchdogs
-        List watchdogs.
+        List heartbeat watchdogs.
 
     watchdog <watchdogId>
-        Get watchdog by id.
+        Get heartbeat watchdog by id.
 
-    heartbeat <watchdogId>
-        Send a heartbeat.
+    beat <watchdogId> [interval]
+        Send a heartbeat. If interval is not specified,
+        moni sends one heartbeat and exits. If interval is
+        specified, moni will stay in the background and send
+        heartbeats in that interval
 
     machines
         List machines.
@@ -106,13 +105,13 @@ Commands
     machine <machineId>
         Get machine by id.
 
-    sample <machineId>
+    sample <machineId> <interval>
         Send resource usage (load/cpu/mem/disk) samples for machine.
         Moni consults various files (/proc/loadavg, /proc/cpuinfo, etc.)
         and commands (/usr/bin/free, /usr/bin/df, etc.) to calculate
-        resource usage. It currently supports linux only.
+        resource usage. Therefore it currently supports linux only.
         Moni will stay in background and keep sampling in specified
-        sample interval, default 5m, see flag 'sampleInterval.
+        interval.
 
     metrics
         List metrics.
@@ -144,7 +143,6 @@ Exit Codes
     0 ok
     1 error
     2 wrong user input
-
 ```
 
 
