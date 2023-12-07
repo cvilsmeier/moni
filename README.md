@@ -4,7 +4,7 @@
 [![Build Status](https://github.com/cvilsmeier/moni/actions/workflows/go-linux.yml/badge.svg)](https://github.com/cvilsmeier/moni/actions/workflows/go-linux.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A command line tool for https://monibot.io - Web App monitoring for developers.
+A command line tool for https://monibot.io - Easy Server and Application Monitoring.
 
 Moni is a command-line tool to interact with the Monibot REST API. It is used to
 
