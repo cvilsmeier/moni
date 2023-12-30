@@ -378,7 +378,7 @@ func main() {
 			}
 		}
 	case "text":
-		// moni text <machineId> <fiename>
+		// moni text <machineId> <filename>
 		machineId := flag.Arg(1)
 		if machineId == "" {
 			fatal(2, "empty machineId")
