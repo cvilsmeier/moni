@@ -96,7 +96,8 @@ Commands
     beat <watchdogId> [interval]
         Send a heartbeat. If interval is not specified, moni sends one
         heartbeat and exits. If interval is specified, moni will stay
-        in the background and send heartbeats in that interval
+        in the background and send heartbeats in that interval.
+        Min. interval is 5m.
 
     machines
         List machines.
@@ -110,7 +111,7 @@ Commands
         etc.) and commands (/usr/bin/free, /usr/bin/df, etc.) to
         calculate resource usage. Therefore it currently supports
         linux only. Moni will stay in background and keep sampling in
-        specified interval.
+        specified interval. Min. interval is 5m.
 
     text <machineId> <filename>
         Send filename as text for machine.
@@ -119,7 +120,7 @@ Commands
         associated with texts. Moni will send the file as text and
         then exit. If an error occurs, moni will print an error
         message. Otherwise moni will print nothing.
-        Max. filesize is 204800 bytes
+        Max. filesize is 204800 bytes.
 
     metrics
         List metrics.
@@ -159,6 +160,8 @@ Exit Codes
 ### v0.1.0
 
 - add text command for sending machine text
+- breakig change: set min watchdog beat interval 5m
+- breakig change: set min machine sample interval 5m
 
 ### v0.0.2
 

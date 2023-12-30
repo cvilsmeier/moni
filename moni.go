@@ -50,7 +50,11 @@ const (
 )
 
 // variuos other definitions
-const maxMachineTextSize = 200 * 1024
+const (
+	maxMachineTextSize = 200 * 1024
+	minBeatInterval    = 5 * time.Minute
+	minSampleInterval  = 5 * time.Minute
+)
 
 func usage() {
 	prt("Moni - A command line tool for https://monibot.io")
@@ -100,7 +104,8 @@ func usage() {
 	prt("    beat <watchdogId> [interval]")
 	prt("        Send a heartbeat. If interval is not specified, moni sends one")
 	prt("        heartbeat and exits. If interval is specified, moni will stay")
-	prt("        in the background and send heartbeats in that interval")
+	prt("        in the background and send heartbeats in that interval.")
+	prt("        Min. interval is %s.", fmtDuration(minBeatInterval))
 	prt("")
 	prt("    machines")
 	prt("        List machines.")
@@ -114,7 +119,7 @@ func usage() {
 	prt("        etc.) and commands (/usr/bin/free, /usr/bin/df, etc.) to")
 	prt("        calculate resource usage. Therefore it currently supports")
 	prt("        linux only. Moni will stay in background and keep sampling in")
-	prt("        specified interval.")
+	prt("        specified interval. Min. interval is %s.", fmtDuration(minSampleInterval))
 	prt("")
 	prt("    text <machineId> <filename>")
 	prt("        Send filename as text for machine.")
@@ -204,9 +209,6 @@ func main() {
 	// parse flags
 	flag.Usage = usage
 	flag.Parse()
-	// are we dev?
-	_, err = os.Stat("dev")
-	dev := err == nil
 	// execute non-API commands
 	command := flag.Arg(0)
 	switch command {
@@ -296,12 +298,10 @@ func main() {
 			if err != nil {
 				fatal(2, "cannot parse interval %q: %s", intervalStr, err)
 			}
-			const minInterval = 1 * time.Minute
-			if interval < minInterval && !dev {
-				fatal(2, "invalid interval %s, must be >= %s", fmtDuration(interval), fmtDuration(minInterval))
+			if interval < minBeatInterval {
+				log.Printf("WARNING: interval " + fmtDuration(interval) + " is below min, force-changing it to " + fmtDuration(minBeatInterval))
+				interval = minBeatInterval
 			}
-		}
-		if interval > 0 {
 			log.Printf("will send heartbeats in background every %s", fmtDuration(interval))
 		}
 		err := api.PostWatchdogHeartbeat(watchdogId)
@@ -352,9 +352,9 @@ func main() {
 		if err != nil {
 			fatal(2, "cannot parse interval %q: %s", intervalStr, err)
 		}
-		const minInterval = 1 * time.Minute
-		if interval < minInterval && !dev {
-			fatal(2, "invalid interval %s, must be >= %s", fmtDuration(interval), fmtDuration(minInterval))
+		if interval < minSampleInterval {
+			log.Printf("WARNING: interval " + fmtDuration(interval) + " is below min, force-changing it to " + fmtDuration(minSampleInterval))
+			interval = minSampleInterval
 		}
 		sampler := internal.NewSampler()
 		// we must warm up the sampler first
