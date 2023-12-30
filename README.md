@@ -160,8 +160,8 @@ Exit Codes
 ### v0.1.0
 
 - add text command for sending machine text
-- breakig change: set min watchdog beat interval 5m
-- breakig change: set min machine sample interval 5m
+- breaking change: set min watchdog beat interval 5m
+- breaking change: set min machine sample interval 5m
 
 ### v0.0.2
 
