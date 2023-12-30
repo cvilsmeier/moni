@@ -10,3 +10,7 @@ github.com/cvilsmeier/monibot-go v0.0.8-0.20231113163359-7eab04d3a50f h1:De+IYfN
 github.com/cvilsmeier/monibot-go v0.0.8-0.20231113163359-7eab04d3a50f/go.mod h1:NBtP4dmXJTmL6i3GNXQyqpX8tOr1O+HPLnc6hEXFprs=
 github.com/cvilsmeier/monibot-go v0.0.8 h1:U2hiHhGH1RKzNvy6yBP9YW/7LFZotvHFf59PEo/eJUc=
 github.com/cvilsmeier/monibot-go v0.0.8/go.mod h1:NBtP4dmXJTmL6i3GNXQyqpX8tOr1O+HPLnc6hEXFprs=
+github.com/cvilsmeier/monibot-go v0.0.9-0.20231230150249-db4a7ec167b2 h1:Xj7+6aHoT5L722FFAycocIgN5Brr3RmXFShcLNu4Oy4=
+github.com/cvilsmeier/monibot-go v0.0.9-0.20231230150249-db4a7ec167b2/go.mod h1:NBtP4dmXJTmL6i3GNXQyqpX8tOr1O+HPLnc6hEXFprs=
+github.com/cvilsmeier/monibot-go v0.0.9 h1:NQg9CNATSjN+9TgxGq/6vS+2pKKXB+Y1o+3a/0YyaEA=
+github.com/cvilsmeier/monibot-go v0.0.9/go.mod h1:NBtP4dmXJTmL6i3GNXQyqpX8tOr1O+HPLnc6hEXFprs=

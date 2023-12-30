@@ -94,10 +94,9 @@ Commands
         Get heartbeat watchdog by id.
 
     beat <watchdogId> [interval]
-        Send a heartbeat. If interval is not specified,
-        moni sends one heartbeat and exits. If interval is
-        specified, moni will stay in the background and send
-        heartbeats in that interval
+        Send a heartbeat. If interval is not specified, moni sends one
+        heartbeat and exits. If interval is specified, moni will stay
+        in the background and send heartbeats in that interval
 
     machines
         List machines.
@@ -107,11 +106,20 @@ Commands
 
     sample <machineId> <interval>
         Send resource usage (load/cpu/mem/disk) samples for machine.
-        Moni consults various files (/proc/loadavg, /proc/cpuinfo, etc.)
-        and commands (/usr/bin/free, /usr/bin/df, etc.) to calculate
-        resource usage. Therefore it currently supports linux only.
-        Moni will stay in background and keep sampling in specified
-        interval.
+        Moni consults various files (/proc/loadavg, /proc/cpuinfo,
+        etc.) and commands (/usr/bin/free, /usr/bin/df, etc.) to
+        calculate resource usage. Therefore it currently supports
+        linux only. Moni will stay in background and keep sampling in
+        specified interval.
+
+    text <machineId> <filename>
+        Send filename as text for machine.
+        Filename can contain arbitrary text, e.g. arbitrary command
+        outputs. It's used for information only, no logic is
+        associated with texts. Moni will send the file as text and
+        then exit. If an error occurs, moni will print an error
+        message. Otherwise moni will print nothing.
+        Max. filesize is 204800 bytes
 
     metrics
         List metrics.
@@ -147,6 +155,10 @@ Exit Codes
 
 
 ## Changelog
+
+### v0.1.0
+
+- add text command for sending machine text
 
 ### v0.0.2
 

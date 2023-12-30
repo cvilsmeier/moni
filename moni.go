@@ -22,8 +22,9 @@ import (
 )
 
 // Version is the moni tool version
-const Version = "v0.0.2"
+const Version = "v0.1.0"
 
+// config flag definitions
 const (
 	urlEnvKey  = "MONIBOT_URL"
 	urlFlag    = "url"
@@ -47,6 +48,9 @@ const (
 	delayFlag    = "delay"
 	defaultDelay = 5 * time.Second
 )
+
+// variuos other definitions
+const maxMachineTextSize = 200 * 1024
 
 func usage() {
 	prt("Moni - A command line tool for https://monibot.io")
@@ -94,10 +98,9 @@ func usage() {
 	prt("        Get heartbeat watchdog by id.")
 	prt("")
 	prt("    beat <watchdogId> [interval]")
-	prt("        Send a heartbeat. If interval is not specified,")
-	prt("        moni sends one heartbeat and exits. If interval is")
-	prt("        specified, moni will stay in the background and send")
-	prt("        heartbeats in that interval")
+	prt("        Send a heartbeat. If interval is not specified, moni sends one")
+	prt("        heartbeat and exits. If interval is specified, moni will stay")
+	prt("        in the background and send heartbeats in that interval")
 	prt("")
 	prt("    machines")
 	prt("        List machines.")
@@ -107,11 +110,20 @@ func usage() {
 	prt("")
 	prt("    sample <machineId> <interval>")
 	prt("        Send resource usage (load/cpu/mem/disk) samples for machine.")
-	prt("        Moni consults various files (/proc/loadavg, /proc/cpuinfo, etc.)")
-	prt("        and commands (/usr/bin/free, /usr/bin/df, etc.) to calculate")
-	prt("        resource usage. Therefore it currently supports linux only.")
-	prt("        Moni will stay in background and keep sampling in specified")
-	prt("        interval.")
+	prt("        Moni consults various files (/proc/loadavg, /proc/cpuinfo,")
+	prt("        etc.) and commands (/usr/bin/free, /usr/bin/df, etc.) to")
+	prt("        calculate resource usage. Therefore it currently supports")
+	prt("        linux only. Moni will stay in background and keep sampling in")
+	prt("        specified interval.")
+	prt("")
+	prt("    text <machineId> <filename>")
+	prt("        Send filename as text for machine.")
+	prt("        Filename can contain arbitrary text, e.g. arbitrary command")
+	prt("        outputs. It's used for information only, no logic is")
+	prt("        associated with texts. Moni will send the file as text and")
+	prt("        then exit. If an error occurs, moni will print an error")
+	prt("        message. Otherwise moni will print nothing.")
+	prt("        Max. filesize is %d bytes.", maxMachineTextSize)
 	prt("")
 	prt("    metrics")
 	prt("        List metrics.")
@@ -364,6 +376,27 @@ func main() {
 			if err != nil {
 				prt("WARNING: cannot POST sample: %s", err)
 			}
+		}
+	case "text":
+		// moni text <machineId> <fiename>
+		machineId := flag.Arg(1)
+		if machineId == "" {
+			fatal(2, "empty machineId")
+		}
+		filename := flag.Arg(2)
+		if filename == "" {
+			fatal(2, "empty filename")
+		}
+		filedata, err := os.ReadFile(filename)
+		if err != nil {
+			fatal(2, "cannot read %s: %s", filename, err)
+		}
+		if len(filedata) > maxMachineTextSize {
+			fatal(2, "file %s too big: %d bytes (max is %d)", filename, len(filedata), maxMachineTextSize)
+		}
+		err = api.PostMachineText(machineId, string(filedata))
+		if err != nil {
+			fatal(1, "%s", err)
 		}
 	case "metrics":
 		// moni metrics
