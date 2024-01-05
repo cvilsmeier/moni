@@ -63,11 +63,12 @@ Flags
 
     -apiKey
         Monibot API Key, default is "".
-        You can set this also via environment variable MONIBOT_API_KEY (recommended).
-        You can find your API Key in your profile on https://monibot.io.
+        You can set this also via environment variable MONIBOT_API_KEY
+        (recommended). You can find your API Key in your profile on
+        https://monibot.io.
         Note: For security, we recommend that you specify the API Key
-        via MONIBOT_API_KEY, and not via -apiKey flag. The flag will show up in
-        'ps aux' outputs and can be eavesdropped.
+        via MONIBOT_API_KEY, and not via -apiKey flag. The flag will show
+        up in 'ps aux' outputs and can be eavesdropped.
 
     -trials
         Max. Send trials, default is 12.
@@ -79,7 +80,8 @@ Flags
 
     -v
         Verbose output, default is false.
-        You can set this also via environment variable MONIBOT_VERBOSE ('true' or 'false').
+        You can set this also via environment variable MONIBOT_VERBOSE
+        ('true' or 'false').
 
 Commands
 
@@ -94,10 +96,10 @@ Commands
         Get heartbeat watchdog by id.
 
     beat <watchdogId> [interval]
-        Send a heartbeat. If interval is not specified, moni sends one
-        heartbeat and exits. If interval is specified, moni will stay
-        in the background and send heartbeats in that interval.
-        Min. interval is 5m.
+        Send a heartbeat. If interval is not specified, moni sends
+        one heartbeat and exits. If interval is specified, moni
+        will stay in the background and send heartbeats in that
+        interval. Min. interval is 5m.
 
     machines
         List machines.
@@ -110,8 +112,8 @@ Commands
         Moni consults various files (/proc/loadavg, /proc/cpuinfo,
         etc.) and commands (/usr/bin/free, /usr/bin/df, etc.) to
         calculate resource usage. Therefore it currently supports
-        linux only. Moni will stay in background and keep sampling in
-        specified interval. Min. interval is 5m.
+        linux only. Moni will stay in background and keep sampling
+        in specified interval. Min. interval is 5m.
 
     text <machineId> <filename>
         Send filename as text for machine.
@@ -136,6 +138,11 @@ Commands
         Set a Gauge metric.
         Value must be a non-negative 64-bit integer value.
 
+    values <metricId> <values>
+        Set histogram metric values.
+        Values must be a list of non-negative 64-bit integer
+        values, for example "0,12,16,16,1,2".
+
     config
         Show config values.
 
@@ -156,6 +163,10 @@ Exit Codes
 
 
 ## Changelog
+
+### v0.2.0
+
+- add values command for sending histogram metric values
 
 ### v0.1.0
 

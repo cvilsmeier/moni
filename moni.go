@@ -71,11 +71,12 @@ func usage() {
 	prt("")
 	prt("    -%s", apiKeyFlag)
 	prt("        Monibot API Key, default is %q.", defaultApiKey)
-	prt("        You can set this also via environment variable %s (recommended).", apiKeyEnvKey)
-	prt("        You can find your API Key in your profile on https://monibot.io.")
+	prt("        You can set this also via environment variable %s", apiKeyEnvKey)
+	prt("        (recommended). You can find your API Key in your profile on")
+	prt("        https://monibot.io.")
 	prt("        Note: For security, we recommend that you specify the API Key")
-	prt("        via %s, and not via -%s flag. The flag will show up in", apiKeyEnvKey, apiKeyFlag)
-	prt("        'ps aux' outputs and can be eavesdropped.")
+	prt("        via %s, and not via -%s flag. The flag will show", apiKeyEnvKey, apiKeyFlag)
+	prt("        up in 'ps aux' outputs and can be eavesdropped.")
 	prt("")
 	prt("    -%s", trialsFlag)
 	prt("        Max. Send trials, default is %v.", defaultTrials)
@@ -87,7 +88,8 @@ func usage() {
 	prt("")
 	prt("    -%s", verboseFlag)
 	prt("        Verbose output, default is %v.", defaultVerboseStr)
-	prt("        You can set this also via environment variable %s ('true' or 'false').", verboseEnvKey)
+	prt("        You can set this also via environment variable %s", verboseEnvKey)
+	prt("        ('true' or 'false').")
 	prt("")
 	prt("Commands")
 	prt("")
@@ -102,10 +104,10 @@ func usage() {
 	prt("        Get heartbeat watchdog by id.")
 	prt("")
 	prt("    beat <watchdogId> [interval]")
-	prt("        Send a heartbeat. If interval is not specified, moni sends one")
-	prt("        heartbeat and exits. If interval is specified, moni will stay")
-	prt("        in the background and send heartbeats in that interval.")
-	prt("        Min. interval is %s.", fmtDuration(minBeatInterval))
+	prt("        Send a heartbeat. If interval is not specified, moni sends")
+	prt("        one heartbeat and exits. If interval is specified, moni")
+	prt("        will stay in the background and send heartbeats in that")
+	prt("        interval. Min. interval is %s.", fmtDuration(minBeatInterval))
 	prt("")
 	prt("    machines")
 	prt("        List machines.")
@@ -118,8 +120,8 @@ func usage() {
 	prt("        Moni consults various files (/proc/loadavg, /proc/cpuinfo,")
 	prt("        etc.) and commands (/usr/bin/free, /usr/bin/df, etc.) to")
 	prt("        calculate resource usage. Therefore it currently supports")
-	prt("        linux only. Moni will stay in background and keep sampling in")
-	prt("        specified interval. Min. interval is %s.", fmtDuration(minSampleInterval))
+	prt("        linux only. Moni will stay in background and keep sampling")
+	prt("        in specified interval. Min. interval is %s.", fmtDuration(minSampleInterval))
 	prt("")
 	prt("    text <machineId> <filename>")
 	prt("        Send filename as text for machine.")
@@ -137,12 +139,17 @@ func usage() {
 	prt("        Get and print metric info.")
 	prt("")
 	prt("    inc <metricId> <value>")
-	prt("        Increment a Counter metric.")
+	prt("        Increment a counter metric.")
 	prt("        Value must be a non-negative 64-bit integer value.")
 	prt("")
 	prt("    set <metricId> <value>")
-	prt("        Set a Gauge metric.")
+	prt("        Set a gauge metric value.")
 	prt("        Value must be a non-negative 64-bit integer value.")
+	prt("")
+	prt("    values <metricId> <values>")
+	prt("        Set histogram metric values.")
+	prt("        Values must be a list of non-negative 64-bit integer")
+	prt("        values, for example \"0,12,16,16,1,2\".")
 	prt("")
 	prt("    config")
 	prt("        Show config values.")
@@ -161,6 +168,7 @@ func usage() {
 	prt("    1 error")
 	prt("    2 wrong user input")
 	prt("")
+	// ---------|---------|---------|---------|---------|---------|---------|
 	// end usage
 }
 
@@ -449,6 +457,35 @@ func main() {
 			fatal(2, "cannot parse value %q: %s", valueStr, err)
 		}
 		err = api.PostMetricSet(metricId, value)
+		if err != nil {
+			fatal(1, "%s", err)
+		}
+	case "values":
+		// moni values <metricId> <values>
+		metricId := flag.Arg(1)
+		if metricId == "" {
+			fatal(2, "empty metricId")
+		}
+		valuesStr := flag.Arg(2)
+		if valuesStr == "" {
+			fatal(2, "empty values")
+		}
+		var values []int64
+		toks := strings.Split(valuesStr, ",")
+		for _, tok := range toks {
+			tok = strings.TrimSpace(tok)
+			// skip empty
+			if len(tok) == 0 {
+				continue
+			}
+			// parse int64 value
+			value, err := strconv.ParseInt(tok, 10, 64)
+			if err != nil {
+				fatal(2, "cannot parse value %q: %s", tok, err)
+			}
+			values = append(values, value)
+		}
+		err := api.PostMetricValues(metricId, values)
 		if err != nil {
 			fatal(1, "%s", err)
 		}
