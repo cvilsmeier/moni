@@ -534,7 +534,16 @@ func printMachines(machines []monibot.Machine) {
 func printMetrics(metrics []monibot.Metric) {
 	prt("%-35s | %-25s | %s", "Id", "Name", "Type")
 	for _, metric := range metrics {
-		prt("%-35s | %-25s | %d", metric.Id, metric.Name, metric.Type)
+		typeSuffix := ""
+		switch metric.Type {
+		case 0:
+			typeSuffix = " (Counter)"
+		case 1:
+			typeSuffix = " (Gauge)"
+		case 2:
+			typeSuffix = " (Histogram)"
+		}
+		prt("%-35s | %-25s | %d%s", metric.Id, metric.Name, metric.Type, typeSuffix)
 	}
 }
 
