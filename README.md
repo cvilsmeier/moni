@@ -8,11 +8,15 @@ A command line tool for https://monibot.io - Easy Server and Application Monitor
 
 Moni is a command-line tool to interact with the Monibot REST API. It is used to
 
+- Query watchdogs from Monibot
+- Send watchdog heartbeats to Monibot
+- Query machines from Monibot
 - Send machine resource usage samples (CPU/Memory/Disk/Network) to Monibot
-- Send heartbeats to Monibot
-- Send custom metric values to Monibot
+- Send machine texts (command outputs) to Monibot
+- Query metrics from Monibot
+- Send metric values to Monibot
 
-It runs on Linux (amd64) and is written in Go.
+It runs on Linux/amd64 and is written in Go.
 
 ## Download
 
@@ -33,14 +37,15 @@ $ go install github.com/cvilsmeier/moni
 
 ## Build
 
-You can build moni from the command line. You need
+If you do not want to download a pre-built binary, you
+can build moni from the command line. You need
 Go 1.20 or higher. For installing Go, see https://go.dev/
 
 ```
 $ git clone https://github.com/cvilsmeier/moni
 $ cd moni/
-$ go build .
-$ ./moni
+$ go build -o ..
+$ ../moni
 ```
 
 
@@ -48,7 +53,6 @@ $ ./moni
 
 ```
 $ moni help
-
 Moni - A command line tool for https://monibot.io
 
 Usage
@@ -131,17 +135,23 @@ Commands
         Get and print metric info.
 
     inc <metricId> <value>
-        Increment a Counter metric.
+        Increment a counter metric.
         Value must be a non-negative 64-bit integer value.
 
     set <metricId> <value>
-        Set a Gauge metric.
+        Set a gauge metric value.
         Value must be a non-negative 64-bit integer value.
 
     values <metricId> <values>
-        Set histogram metric values.
-        Values must be a list of non-negative 64-bit integer
-        values, for example "0,12,16,16,1,2".
+        Send histogram metric values.
+        Values is a comma-separated list of 'value:count' pairs.
+        Each value is a non-negative 64-bit integer value, each
+        count is an integer value greater or equal to 1.
+        If count is 1, the ':count' part is optional, so
+        values '13:1,14:1' and '13,14' are sematically equal.
+        A specific value may occur multiple times, its counts will
+        then be added together, so values '13:2,13:2' and '13:4'
+        are sematically equal.
 
     config
         Show config values.
@@ -163,6 +173,10 @@ Exit Codes
 
 
 ## Changelog
+
+### v0.2.1
+
+- update values command docs
 
 ### v0.2.0
 

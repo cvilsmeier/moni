@@ -19,10 +19,11 @@ import (
 
 	"github.com/cvilsmeier/moni/internal"
 	"github.com/cvilsmeier/monibot-go"
+	"github.com/cvilsmeier/monibot-go/histogram"
 )
 
 // Version is the moni tool version
-const Version = "v0.2.0"
+const Version = "v0.2.1"
 
 // config flag definitions
 const (
@@ -147,9 +148,15 @@ func usage() {
 	prt("        Value must be a non-negative 64-bit integer value.")
 	prt("")
 	prt("    values <metricId> <values>")
-	prt("        Set histogram metric values.")
-	prt("        Values must be a list of non-negative 64-bit integer")
-	prt("        values, for example \"0,12,16,16,1,2\".")
+	prt("        Send histogram metric values.")
+	prt("        Values is a comma-separated list of 'value:count' pairs.")
+	prt("        Each value is a non-negative 64-bit integer value, each")
+	prt("        count is an integer value greater or equal to 1.")
+	prt("        If count is 1, the ':count' part is optional, so")
+	prt("        values '13:1,14:1' and '13,14' are sematically equal.")
+	prt("        A specific value may occur multiple times, its counts will")
+	prt("        then be added together, so values '13:2,13:2' and '13:4'")
+	prt("        are sematically equal.")
 	prt("")
 	prt("    config")
 	prt("        Show config values.")
@@ -470,22 +477,11 @@ func main() {
 		if valuesStr == "" {
 			fatal(2, "empty values")
 		}
-		var values []int64
-		toks := strings.Split(valuesStr, ",")
-		for _, tok := range toks {
-			tok = strings.TrimSpace(tok)
-			// skip empty
-			if len(tok) == 0 {
-				continue
-			}
-			// parse int64 value
-			value, err := strconv.ParseInt(tok, 10, 64)
-			if err != nil {
-				fatal(2, "cannot parse value %q: %s", tok, err)
-			}
-			values = append(values, value)
+		values, err := histogram.ParseValues(valuesStr)
+		if err != nil {
+			fatal(2, "cannot parse values: %s", err)
 		}
-		err := api.PostMetricValues(metricId, values)
+		err = api.PostMetricValues(metricId, values)
 		if err != nil {
 			fatal(1, "%s", err)
 		}
