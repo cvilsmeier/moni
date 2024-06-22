@@ -31,7 +31,7 @@ can install moni from the command line. You need
 Go 1.20 or higher, see https://go.dev/
 
 ```
-$ go install github.com/cvilsmeier/moni
+$ go install github.com/cvilsmeier/moni@latest
 ```
 
 
@@ -44,8 +44,8 @@ Go 1.20 or higher. For installing Go, see https://go.dev/
 ```
 $ git clone https://github.com/cvilsmeier/moni
 $ cd moni/
-$ go build -o ..
-$ ../moni
+$ CGO_ENABLED=0 go build
+$ ./moni help
 ```
 
 
