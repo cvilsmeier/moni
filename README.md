@@ -16,7 +16,7 @@ Moni is a command-line tool to interact with the Monibot REST API. It is used to
 - Query metrics from Monibot
 - Send metric values to Monibot
 
-It runs on Linux/amd64 and is written in Go.
+It runs on Linux/amd64 and is written in Go, see https://go.dev/
 
 ## Download
 
@@ -27,8 +27,7 @@ https://github.com/cvilsmeier/moni/releases/latest
 ## Install
 
 If you do not want to download a pre-built binary, you
-can install moni from the command line. You need
-Go 1.20 or higher, see https://go.dev/
+can install moni from the command line.
 
 ```
 $ go install github.com/cvilsmeier/moni@latest
@@ -38,8 +37,7 @@ $ go install github.com/cvilsmeier/moni@latest
 ## Build
 
 If you do not want to download a pre-built binary, you
-can build moni from the command line. You need
-Go 1.20 or higher. For installing Go, see https://go.dev/
+can build moni from the command line.
 
 ```
 $ git clone https://github.com/cvilsmeier/moni
