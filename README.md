@@ -11,7 +11,7 @@ Moni is a command-line tool to interact with the Monibot REST API. It is used to
 - Query watchdogs from Monibot
 - Send watchdog heartbeats to Monibot
 - Query machines from Monibot
-- Send machine resource usage samples (CPU/Memory/Disk/Network) to Monibot
+- Send machine resource usage samples (CPU/Memory/Disk/Clock/Network) to Monibot
 - Send machine texts (command outputs) to Monibot
 - Query metrics from Monibot
 - Send metric values to Monibot
