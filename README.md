@@ -99,7 +99,7 @@ Commands
     watchdog <watchdogId>
         Get heartbeat watchdog by id.
 
-    beat <watchdogId> [interval]
+    heartbeat <watchdogId> [interval]
         Send a heartbeat. If interval is not specified, moni sends
         one heartbeat and exits. If interval is specified, moni
         will stay in the background and send heartbeats in that
@@ -173,6 +173,10 @@ Exit Codes
 
 
 ## Changelog
+
+### v0.2.2
+
+- renamed beat command to heartbeat
 
 ### v0.2.1
 

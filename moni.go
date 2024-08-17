@@ -23,7 +23,7 @@ import (
 )
 
 // Version is the moni tool version
-const Version = "v0.2.1"
+const Version = "v0.2.2"
 
 // config flag definitions
 const (
@@ -104,7 +104,7 @@ func usage() {
 	prt("    watchdog <watchdogId>")
 	prt("        Get heartbeat watchdog by id.")
 	prt("")
-	prt("    beat <watchdogId> [interval]")
+	prt("    heartbeat <watchdogId> [interval]")
 	prt("        Send a heartbeat. If interval is not specified, moni sends")
 	prt("        one heartbeat and exits. If interval is specified, moni")
 	prt("        will stay in the background and send heartbeats in that")
@@ -226,6 +226,9 @@ func main() {
 	flag.Parse()
 	// execute non-API commands
 	command := flag.Arg(0)
+	if command == "beat" {
+		log.Printf("WARNING: the 'beat' command is deprecated and will be removed in a future version. Please use the 'heartbeat' command instead.")
+	}
 	switch command {
 	case "", "help":
 		usage()
@@ -300,8 +303,8 @@ func main() {
 			fatal(1, "%s", err)
 		}
 		printWatchdogs([]monibot.Watchdog{watchdog})
-	case "beat":
-		// moni beat <watchdogId> [interval]
+	case "heartbeat":
+		// moni heartbeat <watchdogId> [interval]
 		watchdogId := flag.Arg(1)
 		if watchdogId == "" {
 			fatal(2, "empty watchdogId")
