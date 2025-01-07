@@ -51,13 +51,13 @@ CGO_ENABLED=0 go build
 
 ```
 $ moni help
-Moni - A command line tool for https://monibot.io
+moni - a command line tool for https://monibot.io
 
-Usage
+usage
 
     moni [flags] command
 
-Flags
+flags
 
     -url
         Monibot URL, default is "https://monibot.io".
@@ -85,7 +85,7 @@ Flags
         You can set this also via environment variable MONIBOT_VERBOSE
         ('true' or 'false').
 
-Commands
+commands
 
     ping
         Ping the Monibot API. If an error occurs, moni will print

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"io/fs"
 	"os"
 	"strings"
@@ -29,40 +27,24 @@ func TestSrc(t *testing.T) {
 		}
 		return before
 	}
-	md5sum := func(s string) string {
-		sum := md5.Sum([]byte(s))
-		return hex.EncodeToString(sum[:])
-	}
-	// calc checksums of usage docs in moni.go and README.md, so
-	// that if one changes, we get nagged to change the other.
+	// usage in README.md must be in sync
 	t.Run("UsageMustBeInSync", func(t *testing.T) {
-		// checksum moni.go
-		{
-			text := cutout(readFile("moni.go"), "func usage() {", "// end usage")
-			checksum := md5sum(text)
-			if checksum != "e56bed1242559ad0b613f565cff9bb4e" {
-				t.Fatal("wrong", checksum)
-			}
-		}
-		// checksum README.md
-		{
-			text := readFile("README.md")
-			text = cutout(text, "## Usage", "## Changelog")
-			text = cutout(text, "```", "```")
-			checksum := md5sum(text)
-			if checksum != "af1f7e2aea75cfac446d365cb33238b9" {
-				t.Fatal("wrong", checksum)
-			}
+		var sb strings.Builder
+		printUsage(&sb)
+		usageText := sb.String()
+		readmeText := readFile("README.md")
+		if !strings.Contains(readmeText, usageText) {
+			t.Fatalf("wrong usage in README.md,\nwant %q\nhave %q", usageText, readmeText)
 		}
 	})
-	// version.go and README.md must have same version
+	// README.md version must be in sync
 	t.Run("VersionMustBeInSync", func(t *testing.T) {
 		v := "v" + cutout(readFile("README.md"), "### v", "\n")
 		if v != Version {
 			t.Fatal("wrong readme version", v)
 		}
 	})
-	// find FIXME markers in source code
+	// find markers in source code
 	t.Run("FixmeMarkers", func(t *testing.T) {
 		_, err := os.Stat("go.mod")
 		if err != nil {
@@ -74,8 +56,8 @@ func TestSrc(t *testing.T) {
 			}
 			if strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "src_test.go") {
 				text := readFile(path)
-				if strings.Contains(text, "cvvvv") || strings.Contains(text, "FIXME") {
-					t.Fatal("found cvvvv/FIXME ", path)
+				if strings.Contains(text, "cv"+"vvv") || strings.Contains(text, "FIX"+"ME") {
+					t.Fatal("found cv"+"vvv/FIX"+"ME in ", path)
 				}
 			}
 			return nil
