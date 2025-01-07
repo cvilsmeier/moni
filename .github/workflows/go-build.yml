@@ -1,11 +1,11 @@
-name: go-windows
+name: go-build
 
 on: [push]
 
 jobs:
 
   build:
-    runs-on: windows-latest
+    runs-on: [ubuntu-latest, windows-latest]
     
     strategy:
       matrix:
