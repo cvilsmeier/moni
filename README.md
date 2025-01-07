@@ -16,11 +16,11 @@ Moni is a command-line tool to interact with the Monibot REST API. It is used to
 - Query metrics from Monibot
 - Send metric values to Monibot
 
-It runs on Linux/amd64 and is written in Go, see https://go.dev/
+It is written in [Go](https://go.dev/) and runs on Linux/amd64.
 
 ## Download
 
-Download a pre-built linux/amd64 binary from here:
+Download a pre-built binary from here:
 https://github.com/cvilsmeier/moni/releases/latest
 
 
@@ -30,7 +30,7 @@ If you do not want to download a pre-built binary, you
 can install moni from the command line.
 
 ```
-$ go install github.com/cvilsmeier/moni@latest
+go install github.com/cvilsmeier/moni@latest
 ```
 
 
@@ -40,10 +40,10 @@ If you do not want to download a pre-built binary, you
 can build moni from the command line.
 
 ```
-$ git clone https://github.com/cvilsmeier/moni
-$ cd moni/
-$ CGO_ENABLED=0 go build
-$ ./moni help
+git clone https://github.com/cvilsmeier/moni
+cd moni/
+CGO_ENABLED=0 go build
+./moni help
 ```
 
 
@@ -94,9 +94,6 @@ Commands
     watchdogs
         List heartbeat watchdogs.
 
-    watchdog <watchdogId>
-        Get heartbeat watchdog by id.
-
     heartbeat <watchdogId> [interval]
         Send a heartbeat. If interval is not specified, moni sends
         one heartbeat and exits. If interval is specified, moni
@@ -105,9 +102,6 @@ Commands
 
     machines
         List machines.
-
-    machine <machineId>
-        Get machine by id.
 
     sample <machineId> <interval>
         Send resource usage (load/cpu/mem/disk) samples for machine.
@@ -128,9 +122,6 @@ Commands
 
     metrics
         List metrics.
-
-    metric <metricId>
-        Get and print metric info.
 
     inc <metricId> <value>
         Increment a counter metric.
@@ -171,6 +162,10 @@ Exit Codes
 
 
 ## Changelog
+
+### v0.3.0
+
+- remove watchdog, machine and metric command
 
 ### v0.2.2
 

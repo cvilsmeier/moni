@@ -17,13 +17,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cvilsmeier/moni/internal"
 	"github.com/cvilsmeier/monibot-go"
 	"github.com/cvilsmeier/monibot-go/histogram"
 )
 
 // Version is the moni tool version
-const Version = "v0.2.2"
+const Version = "v0.3.0"
 
 // config flag definitions
 const (
@@ -52,9 +51,9 @@ const (
 
 // variuos other definitions
 const (
-	maxMachineTextSize = 200 * 1024
-	minBeatInterval    = 5 * time.Minute
-	minSampleInterval  = 5 * time.Minute
+	maxMachineTextSize   = 200 * 1024
+	minHeartbeatInterval = 5 * time.Minute
+	minSampleInterval    = 5 * time.Minute
 )
 
 func usage() {
@@ -101,20 +100,14 @@ func usage() {
 	prt("    watchdogs")
 	prt("        List heartbeat watchdogs.")
 	prt("")
-	prt("    watchdog <watchdogId>")
-	prt("        Get heartbeat watchdog by id.")
-	prt("")
 	prt("    heartbeat <watchdogId> [interval]")
 	prt("        Send a heartbeat. If interval is not specified, moni sends")
 	prt("        one heartbeat and exits. If interval is specified, moni")
 	prt("        will stay in the background and send heartbeats in that")
-	prt("        interval. Min. interval is %s.", fmtDuration(minBeatInterval))
+	prt("        interval. Min. interval is %s.", fmtDuration(minHeartbeatInterval))
 	prt("")
 	prt("    machines")
 	prt("        List machines.")
-	prt("")
-	prt("    machine <machineId>")
-	prt("        Get machine by id.")
 	prt("")
 	prt("    sample <machineId> <interval>")
 	prt("        Send resource usage (load/cpu/mem/disk) samples for machine.")
@@ -135,9 +128,6 @@ func usage() {
 	prt("")
 	prt("    metrics")
 	prt("        List metrics.")
-	prt("")
-	prt("    metric <metricId>")
-	prt("        Get and print metric info.")
 	prt("")
 	prt("    inc <metricId> <value>")
 	prt("        Increment a counter metric.")
@@ -226,9 +216,6 @@ func main() {
 	flag.Parse()
 	// execute non-API commands
 	command := flag.Arg(0)
-	if command == "beat" {
-		log.Printf("WARNING: the 'beat' command is deprecated and will be removed in a future version. Please use the 'heartbeat' command instead.")
-	}
 	switch command {
 	case "", "help":
 		usage()
@@ -257,16 +244,16 @@ func main() {
 	const minTrials = 1
 	const maxTrials = 100
 	if trials < minTrials {
-		fatal(2, "invalid trials %s, must be >= %s", trials, minTrials)
+		fatal(2, "invalid trials %v, must be >= %v", trials, minTrials)
 	} else if trials > maxTrials {
-		fatal(2, "invalid trials %s, must be <= %s", trials, maxTrials)
+		fatal(2, "invalid trials %v, must be <= %v", trials, maxTrials)
 	}
 	const minDelay = 1 * time.Second
 	const maxDelay = 24 * time.Hour
 	if delay < minDelay {
-		fatal(2, "invalid delay %s, must be >= %s", delay, minDelay)
+		fatal(2, "invalid delay %s, must be >= %s", fmtDuration(delay), fmtDuration(minDelay))
 	} else if delay > maxDelay {
-		fatal(2, "invalid delay %s, must be <= %s", delay, maxDelay)
+		fatal(2, "invalid delay %s, must be <= %s", fmtDuration(delay), fmtDuration(maxDelay))
 	}
 	// init monibot Api
 	var options monibot.ApiOptions
@@ -292,17 +279,6 @@ func main() {
 			fatal(1, "%s", err)
 		}
 		printWatchdogs(watchdogs)
-	case "watchdog":
-		// moni watchdog <watchdogId>
-		watchdogId := flag.Arg(1)
-		if watchdogId == "" {
-			fatal(2, "empty watchdogId")
-		}
-		watchdog, err := api.GetWatchdog(watchdogId)
-		if err != nil {
-			fatal(1, "%s", err)
-		}
-		printWatchdogs([]monibot.Watchdog{watchdog})
 	case "heartbeat":
 		// moni heartbeat <watchdogId> [interval]
 		watchdogId := flag.Arg(1)
@@ -316,9 +292,9 @@ func main() {
 			if err != nil {
 				fatal(2, "cannot parse interval %q: %s", intervalStr, err)
 			}
-			if interval < minBeatInterval {
-				log.Printf("WARNING: interval " + fmtDuration(interval) + " is below min, force-changing it to " + fmtDuration(minBeatInterval))
-				interval = minBeatInterval
+			if interval < minHeartbeatInterval {
+				log.Printf("WARNING: interval %s is below min, force-changing it to %s", fmtDuration(interval), fmtDuration(minHeartbeatInterval))
+				interval = minHeartbeatInterval
 			}
 			log.Printf("will send heartbeats in background every %s", fmtDuration(interval))
 		}
@@ -345,17 +321,6 @@ func main() {
 			fatal(1, "%s", err)
 		}
 		printMachines(machines)
-	case "machine":
-		// moni machine <machineId>
-		machineId := flag.Arg(1)
-		if machineId == "" {
-			fatal(2, "empty machineId")
-		}
-		machine, err := api.GetMachine(machineId)
-		if err != nil {
-			fatal(1, "%s", err)
-		}
-		printMachines([]monibot.Machine{machine})
 	case "sample":
 		// moni sample <machineId> <interval>
 		machineId := flag.Arg(1)
@@ -371,10 +336,10 @@ func main() {
 			fatal(2, "cannot parse interval %q: %s", intervalStr, err)
 		}
 		if interval < minSampleInterval {
-			log.Printf("WARNING: interval " + fmtDuration(interval) + " is below min, force-changing it to " + fmtDuration(minSampleInterval))
+			log.Printf("WARNING: interval %s is below min, force-changing it to %s", fmtDuration(interval), fmtDuration(minSampleInterval))
 			interval = minSampleInterval
 		}
-		sampler := internal.NewSampler()
+		sampler := NewSampler()
 		// we must warm up the sampler first
 		_, err = sampler.Sample()
 		if err != nil {
@@ -423,17 +388,6 @@ func main() {
 			fatal(1, "%s", err)
 		}
 		printMetrics(metrics)
-	case "metric":
-		// moni metric <metricId>
-		metricId := flag.Arg(1)
-		if metricId == "" {
-			fatal(2, "empty metricId")
-		}
-		metric, err := api.GetMetric(metricId)
-		if err != nil {
-			fatal(1, "%s", err)
-		}
-		printMetrics([]monibot.Metric{metric})
 	case "inc":
 		// moni inc <metricId> <value>
 		metricId := flag.Arg(1)
