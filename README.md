@@ -16,7 +16,7 @@ Moni is a command-line tool to interact with the Monibot REST API. It is used to
 - Query metrics from Monibot
 - Send metric values to Monibot
 
-It is written in [Go](https://go.dev/) and runs on Linux/amd64.
+It is written in [Go](https://go.dev/) and runs on Linux/amd64 and Windows/amd64.
 
 ## Download
 
@@ -166,6 +166,7 @@ Exit Codes
 ### v0.3.0
 
 - remove watchdog, machine and metric command
+- use shirou/gopsutil for machine sampling (to support windows)
 
 ### v0.2.2
 

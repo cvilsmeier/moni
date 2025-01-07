@@ -294,7 +294,7 @@ func main() {
 				log.Printf("WARNING: interval %s is below min, force-changing it to %s", fmtDuration(interval), fmtDuration(minHeartbeatInterval))
 				interval = minHeartbeatInterval
 			}
-			log.Printf("will send heartbeats in background every %s", fmtDuration(interval))
+			log.Printf("INFO: will send heartbeats in background every %s", fmtDuration(interval))
 		}
 		err := api.PostWatchdogHeartbeat(watchdogId)
 		if err != nil {
@@ -337,14 +337,14 @@ func main() {
 			log.Printf("WARNING: interval %s is below min, force-changing it to %s", fmtDuration(interval), fmtDuration(minSampleInterval))
 			interval = minSampleInterval
 		}
-		sampler := NewSampler()
+		sampler := NewSampler(Platform{})
 		// we must warm up the sampler first
 		_, err = sampler.Sample()
 		if err != nil {
 			fatal(1, "cannot sample: %s", err)
 		}
 		// entering sampling loop
-		log.Printf("will send samples in background every %s", fmtDuration(interval))
+		log.Printf("INFO: will send samples in background every %s", fmtDuration(interval))
 		for {
 			// sleep
 			time.Sleep(interval)
