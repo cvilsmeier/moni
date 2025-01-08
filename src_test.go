@@ -14,7 +14,9 @@ func TestSrc(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		return string(data)
+		text := string(data)
+		text = strings.ReplaceAll(text, "\r", "")
+		return text
 	}
 	cutout := func(s, from, to string) string {
 		_, after, ok := strings.Cut(s, from)
