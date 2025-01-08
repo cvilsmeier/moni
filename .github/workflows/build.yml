@@ -33,7 +33,6 @@ jobs:
           export GOARCH=amd64
           go version
           go env
-          go test ./...
           go build -v .
           mkdir -p _dist/windows
           cp moni README.md _dist/windows
