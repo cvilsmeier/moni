@@ -58,113 +58,110 @@ const (
 )
 
 func printUsage(w io.Writer) {
-	fprt(w, "moni - a command line tool for https://monibot.io")
-	fprt(w, "")
-	fprt(w, "usage")
-	fprt(w, "")
-	fprt(w, "    moni [flags] command")
-	fprt(w, "")
-	fprt(w, "flags")
-	fprt(w, "")
-	fprt(w, "    -%s", urlFlag)
-	fprt(w, "        Monibot URL, default is %q.", defaultUrl)
-	fprt(w, "        You can set this also via environment variable %s.", urlEnvKey)
-	fprt(w, "")
-	fprt(w, "    -%s", apiKeyFlag)
-	fprt(w, "        Monibot API Key, default is %q.", defaultApiKey)
-	fprt(w, "        You can set this also via environment variable %s", apiKeyEnvKey)
-	fprt(w, "        (recommended). You can find your API Key in your profile on")
-	fprt(w, "        https://monibot.io.")
-	fprt(w, "        Note: For security, we recommend that you specify the API Key")
-	fprt(w, "        via %s, and not via -%s flag. The flag will show", apiKeyEnvKey, apiKeyFlag)
-	fprt(w, "        up in 'ps aux' outputs and can be eavesdropped.")
-	fprt(w, "")
-	fprt(w, "    -%s", trialsFlag)
-	fprt(w, "        Max. Send trials, default is %v.", defaultTrials)
-	fprt(w, "        You can set this also via environment variable %s.", trialsEnvKey)
-	fprt(w, "")
-	fprt(w, "    -%s", delayFlag)
-	fprt(w, "        Delay between trials, default is %v.", fmtDuration(defaultDelay))
-	fprt(w, "        You can set this also via environment variable %s.", delayEnvKey)
-	fprt(w, "")
-	fprt(w, "    -%s", verboseFlag)
-	fprt(w, "        Verbose output, default is %v.", defaultVerboseStr)
-	fprt(w, "        You can set this also via environment variable %s", verboseEnvKey)
-	fprt(w, "        ('true' or 'false').")
-	fprt(w, "")
-	fprt(w, "commands")
-	fprt(w, "")
-	fprt(w, "    ping")
-	fprt(w, "        Ping the Monibot API. If an error occurs, moni will print")
-	fprt(w, "        that error. It it succeeds, moni will print nothing.")
-	fprt(w, "")
-	fprt(w, "    watchdogs")
-	fprt(w, "        List heartbeat watchdogs.")
-	fprt(w, "")
-	fprt(w, "    heartbeat <watchdogId> [interval]")
-	fprt(w, "        Send a heartbeat. If interval is not specified, moni sends")
-	fprt(w, "        one heartbeat and exits. If interval is specified, moni")
-	fprt(w, "        will stay in the background and send heartbeats in that")
-	fprt(w, "        interval. Min. interval is %s.", fmtDuration(minHeartbeatInterval))
-	fprt(w, "")
-	fprt(w, "    machines")
-	fprt(w, "        List machines.")
-	fprt(w, "")
-	fprt(w, "    sample <machineId> <interval>")
-	fprt(w, "        Send resource usage (load/cpu/mem/disk) samples for machine.")
-	fprt(w, "        Moni consults various files (/proc/loadavg, /proc/cpuinfo,")
-	fprt(w, "        etc.) and commands (/usr/bin/free, /usr/bin/df, etc.) to")
-	fprt(w, "        calculate resource usage. Therefore it currently supports")
-	fprt(w, "        linux only. Moni will stay in background and keep sampling")
-	fprt(w, "        in specified interval. Min. interval is %s.", fmtDuration(minSampleInterval))
-	fprt(w, "")
-	fprt(w, "    text <machineId> <filename>")
-	fprt(w, "        Send filename as text for machine.")
-	fprt(w, "        Filename can contain arbitrary text, e.g. arbitrary command")
-	fprt(w, "        outputs. It's used for information only, no logic is")
-	fprt(w, "        associated with texts. Moni will send the file as text and")
-	fprt(w, "        then exit. If an error occurs, moni will print an error")
-	fprt(w, "        message. Otherwise moni will print nothing.")
-	fprt(w, "        Max. filesize is %d bytes.", maxMachineTextSize)
-	fprt(w, "")
-	fprt(w, "    metrics")
-	fprt(w, "        List metrics.")
-	fprt(w, "")
-	fprt(w, "    inc <metricId> <value>")
-	fprt(w, "        Increment a counter metric.")
-	fprt(w, "        Value must be a non-negative 64-bit integer value.")
-	fprt(w, "")
-	fprt(w, "    set <metricId> <value>")
-	fprt(w, "        Set a gauge metric value.")
-	fprt(w, "        Value must be a non-negative 64-bit integer value.")
-	fprt(w, "")
-	fprt(w, "    values <metricId> <values>")
-	fprt(w, "        Send histogram metric values.")
-	fprt(w, "        Values is a comma-separated list of 'value:count' pairs.")
-	fprt(w, "        Each value is a non-negative 64-bit integer value, each")
-	fprt(w, "        count is an integer value greater or equal to 1.")
-	fprt(w, "        If count is 1, the ':count' part is optional, so")
-	fprt(w, "        values '13:1,14:1' and '13,14' are sematically equal.")
-	fprt(w, "        A specific value may occur multiple times, its counts will")
-	fprt(w, "        then be added together, so values '13:2,13:2' and '13:4'")
-	fprt(w, "        are sematically equal.")
-	fprt(w, "")
-	fprt(w, "    config")
-	fprt(w, "        Show config values.")
-	fprt(w, "")
-	fprt(w, "    version")
-	fprt(w, "        Show moni program version.")
-	fprt(w, "")
-	fprt(w, "    sdk-version")
-	fprt(w, "        Show the monibot-go SDK version moni was built with.")
-	fprt(w, "")
-	fprt(w, "    help")
-	fprt(w, "        Show this help page.")
-	fprt(w, "")
-	fprt(w, "Exit Codes")
-	fprt(w, "    0 ok")
-	fprt(w, "    1 error")
-	fprt(w, "    2 wrong user input")
+	fprtf(w, "moni - a command line tool for https://monibot.io")
+	fprtf(w, "")
+	fprtf(w, "usage")
+	fprtf(w, "")
+	fprtf(w, "    moni [flags] command")
+	fprtf(w, "")
+	fprtf(w, "flags")
+	fprtf(w, "")
+	fprtf(w, "    -%s", urlFlag)
+	fprtf(w, "        Monibot URL, default is %q.", defaultUrl)
+	fprtf(w, "        You can set this also via environment variable %s.", urlEnvKey)
+	fprtf(w, "")
+	fprtf(w, "    -%s", apiKeyFlag)
+	fprtf(w, "        Monibot API Key, default is %q.", defaultApiKey)
+	fprtf(w, "        You can set this also via environment variable %s", apiKeyEnvKey)
+	fprtf(w, "        (recommended). You can find your API Key in your profile on")
+	fprtf(w, "        https://monibot.io.")
+	fprtf(w, "        Note: For security, we recommend that you specify the API Key")
+	fprtf(w, "        via %s, and not via -%s flag. The flag will show", apiKeyEnvKey, apiKeyFlag)
+	fprtf(w, "        up in 'ps aux' outputs and can be eavesdropped.")
+	fprtf(w, "")
+	fprtf(w, "    -%s", trialsFlag)
+	fprtf(w, "        Max. Send trials, default is %v.", defaultTrials)
+	fprtf(w, "        You can set this also via environment variable %s.", trialsEnvKey)
+	fprtf(w, "")
+	fprtf(w, "    -%s", delayFlag)
+	fprtf(w, "        Delay between trials, default is %v.", fmtDuration(defaultDelay))
+	fprtf(w, "        You can set this also via environment variable %s.", delayEnvKey)
+	fprtf(w, "")
+	fprtf(w, "    -%s", verboseFlag)
+	fprtf(w, "        Verbose output, default is %v.", defaultVerboseStr)
+	fprtf(w, "        You can set this also via environment variable %s", verboseEnvKey)
+	fprtf(w, "        ('true' or 'false').")
+	fprtf(w, "")
+	fprtf(w, "commands")
+	fprtf(w, "")
+	fprtf(w, "    ping")
+	fprtf(w, "        Ping the Monibot API. If an error occurs, moni will print")
+	fprtf(w, "        that error. It it succeeds, moni will print nothing.")
+	fprtf(w, "")
+	fprtf(w, "    watchdogs")
+	fprtf(w, "        List heartbeat watchdogs.")
+	fprtf(w, "")
+	fprtf(w, "    heartbeat <watchdogId> [interval]")
+	fprtf(w, "        Send a heartbeat. If interval is not specified, moni sends")
+	fprtf(w, "        one heartbeat and exits. If interval is specified, moni")
+	fprtf(w, "        will stay in the background and send heartbeats in that")
+	fprtf(w, "        interval. Min. interval is %s.", fmtDuration(minHeartbeatInterval))
+	fprtf(w, "")
+	fprtf(w, "    machines")
+	fprtf(w, "        List machines.")
+	fprtf(w, "")
+	fprtf(w, "    sample <machineId> <interval>")
+	fprtf(w, "        Send resource usage (load/cpu/mem/disk) samples for machine.")
+	fprtf(w, "        This command will stay in background and keep sampling")
+	fprtf(w, "        in specified interval. Min. interval is %s.", fmtDuration(minSampleInterval))
+	fprtf(w, "")
+	fprtf(w, "    text <machineId> <filename>")
+	fprtf(w, "        Send filename as text for machine.")
+	fprtf(w, "        Filename can contain arbitrary text, e.g. arbitrary command")
+	fprtf(w, "        outputs. It's used for information only, no logic is")
+	fprtf(w, "        associated with texts. Moni will send the file as text and")
+	fprtf(w, "        then exit. If an error occurs, moni will print an error")
+	fprtf(w, "        message. Otherwise moni will print nothing.")
+	fprtf(w, "        Max. filesize is %d bytes.", maxMachineTextSize)
+	fprtf(w, "")
+	fprtf(w, "    metrics")
+	fprtf(w, "        List metrics.")
+	fprtf(w, "")
+	fprtf(w, "    inc <metricId> <value>")
+	fprtf(w, "        Increment a counter metric.")
+	fprtf(w, "        Value must be a non-negative 64-bit integer value.")
+	fprtf(w, "")
+	fprtf(w, "    set <metricId> <value>")
+	fprtf(w, "        Set a gauge metric value.")
+	fprtf(w, "        Value must be a non-negative 64-bit integer value.")
+	fprtf(w, "")
+	fprtf(w, "    values <metricId> <values>")
+	fprtf(w, "        Send histogram metric values.")
+	fprtf(w, "        Values is a comma-separated list of 'value:count' pairs.")
+	fprtf(w, "        Each value is a non-negative 64-bit integer value, each")
+	fprtf(w, "        count is an integer value greater or equal to 1.")
+	fprtf(w, "        If count is 1, the ':count' part is optional, so")
+	fprtf(w, "        values '13:1,14:1' and '13,14' are sematically equal.")
+	fprtf(w, "        A specific value may occur multiple times, its counts will")
+	fprtf(w, "        then be added together, so values '13:2,13:2' and '13:4'")
+	fprtf(w, "        are sematically equal.")
+	fprtf(w, "")
+	fprtf(w, "    config")
+	fprtf(w, "        Show config values.")
+	fprtf(w, "")
+	fprtf(w, "    version")
+	fprtf(w, "        Show moni program version.")
+	fprtf(w, "")
+	fprtf(w, "    sdk-version")
+	fprtf(w, "        Show the monibot-go SDK version moni was built with.")
+	fprtf(w, "")
+	fprtf(w, "    help")
+	fprtf(w, "        Show this help page.")
+	fprtf(w, "")
+	fprtf(w, "Exit Codes")
+	fprtf(w, "    0 ok")
+	fprtf(w, "    1 error")
+	fprtf(w, "    2 wrong user input")
 }
 
 func main() {
@@ -209,6 +206,8 @@ func main() {
 	}
 	verbose := verboseStr == "true"
 	flag.BoolVar(&verbose, verboseFlag, verbose, "")
+	var devMode bool
+	flag.BoolVar(&devMode, "dev", devMode, "")
 	// parse flags
 	flag.Usage = func() { printUsage(os.Stdout) }
 	flag.Parse()
@@ -219,17 +218,20 @@ func main() {
 		printUsage(os.Stdout)
 		os.Exit(0)
 	case "config":
-		prt("url             %v", url)
-		prt("apiKey          %v", apiKey)
-		prt("trials          %v", trials)
-		prt("delay           %v", fmtDuration(delay))
-		prt("verbose         %v", verbose)
+		prtf("url             %v", url)
+		prtf("apiKey          %v", apiKey)
+		prtf("trials          %v", trials)
+		prtf("delay           %v", fmtDuration(delay))
+		prtf("verbose         %v", verbose)
+		if devMode {
+			prtf("devMode         %v", devMode)
+		}
 		os.Exit(0)
 	case "version":
-		prt("moni %s", Version)
+		prtf("moni %s", Version)
 		os.Exit(0)
 	case "sdk-version":
-		prt("monibot-go %s", monibot.Version)
+		prtf("monibot-go %s", monibot.Version)
 		os.Exit(0)
 	}
 	// validate flags
@@ -277,6 +279,17 @@ func main() {
 			fatal(1, "%s", err)
 		}
 		printWatchdogs(watchdogs)
+	case "watchdog":
+		// moni watchdog <watchdogId>
+		watchdogId := flag.Arg(1)
+		if watchdogId == "" {
+			fatal(2, "empty watchdogId")
+		}
+		watchdog, err := api.GetWatchdog(watchdogId)
+		if err != nil {
+			fatal(1, "%s", err)
+		}
+		printWatchdogs([]monibot.Watchdog{watchdog})
 	case "heartbeat":
 		// moni heartbeat <watchdogId> [interval]
 		watchdogId := flag.Arg(1)
@@ -290,7 +303,7 @@ func main() {
 			if err != nil {
 				fatal(2, "cannot parse interval %q: %s", intervalStr, err)
 			}
-			if interval < minHeartbeatInterval {
+			if interval < minHeartbeatInterval && !devMode {
 				log.Printf("WARNING: interval %s is below min, force-changing it to %s", fmtDuration(interval), fmtDuration(minHeartbeatInterval))
 				interval = minHeartbeatInterval
 			}
@@ -308,7 +321,7 @@ func main() {
 				// send
 				err := api.PostWatchdogHeartbeat(watchdogId)
 				if err != nil {
-					prt("WARNING: cannot send heartbeat: %s", err)
+					prtf("WARNING: cannot send heartbeat: %s", err)
 				}
 			}
 		}
@@ -319,6 +332,17 @@ func main() {
 			fatal(1, "%s", err)
 		}
 		printMachines(machines)
+	case "machine":
+		// moni machine <machineId>
+		machineId := flag.Arg(1)
+		if machineId == "" {
+			fatal(2, "empty machineId")
+		}
+		machine, err := api.GetMachine(machineId)
+		if err != nil {
+			fatal(1, "%s", err)
+		}
+		printMachines([]monibot.Machine{machine})
 	case "sample":
 		// moni sample <machineId> <interval>
 		machineId := flag.Arg(1)
@@ -333,7 +357,7 @@ func main() {
 		if err != nil {
 			fatal(2, "cannot parse interval %q: %s", intervalStr, err)
 		}
-		if interval < minSampleInterval {
+		if interval < minSampleInterval && !devMode {
 			log.Printf("WARNING: interval %s is below min, force-changing it to %s", fmtDuration(interval), fmtDuration(minSampleInterval))
 			interval = minSampleInterval
 		}
@@ -351,11 +375,11 @@ func main() {
 			// sample
 			sample, err := sampler.Sample()
 			if err != nil {
-				prt("WARNING: cannot sample: %s", err)
+				prtf("WARNING: cannot sample: %s", err)
 			}
 			err = api.PostMachineSample(machineId, sample)
 			if err != nil {
-				prt("WARNING: cannot POST sample: %s", err)
+				prtf("WARNING: cannot POST sample: %s", err)
 			}
 		}
 	case "text":
@@ -386,6 +410,17 @@ func main() {
 			fatal(1, "%s", err)
 		}
 		printMetrics(metrics)
+	case "metric":
+		// moni metric <metricId>
+		metricId := flag.Arg(1)
+		if metricId == "" {
+			fatal(2, "empty metricId")
+		}
+		metric, err := api.GetMetric(metricId)
+		if err != nil {
+			fatal(1, "%s", err)
+		}
+		printMetrics([]monibot.Metric{metric})
 	case "inc":
 		// moni inc <metricId> <value>
 		metricId := flag.Arg(1)
@@ -447,7 +482,7 @@ func main() {
 
 // fatal prints a message to stdout and exits with exitCode.
 func fatal(exitCode int, f string, a ...any) {
-	fmt.Printf(f+"\n", a...)
+	prtf(f+"\n", a...)
 	os.Exit(exitCode)
 }
 
@@ -467,23 +502,23 @@ func fmtDuration(d time.Duration) string {
 
 // printWatchdogs prints watchdogs.
 func printWatchdogs(watchdogs []monibot.Watchdog) {
-	prt("%-35s | %-25s | %s", "Id", "Name", "IntervalMillis")
+	prtf("%-35s | %-25s | %s", "Id", "Name", "IntervalMillis")
 	for _, watchdog := range watchdogs {
-		prt("%-35s | %-25s | %d", watchdog.Id, watchdog.Name, watchdog.IntervalMillis)
+		prtf("%-35s | %-25s | %d", watchdog.Id, watchdog.Name, watchdog.IntervalMillis)
 	}
 }
 
 // printMachines prints machines.
 func printMachines(machines []monibot.Machine) {
-	prt("%-35s | %s", "Id", "Name")
+	prtf("%-35s | %s", "Id", "Name")
 	for _, machine := range machines {
-		prt("%-35s | %s", machine.Id, machine.Name)
+		prtf("%-35s | %s", machine.Id, machine.Name)
 	}
 }
 
 // printMetrics prints metrics.
 func printMetrics(metrics []monibot.Metric) {
-	prt("%-35s | %-25s | %s", "Id", "Name", "Type")
+	prtf("%-35s | %-25s | %s", "Id", "Name", "Type")
 	for _, metric := range metrics {
 		typeSuffix := ""
 		switch metric.Type {
@@ -494,17 +529,17 @@ func printMetrics(metrics []monibot.Metric) {
 		case 2:
 			typeSuffix = " (Histogram)"
 		}
-		prt("%-35s | %-25s | %d%s", metric.Id, metric.Name, metric.Type, typeSuffix)
+		prtf("%-35s | %-25s | %d%s", metric.Id, metric.Name, metric.Type, typeSuffix)
 	}
 }
 
-// prt prints a line to stdout.
-func prt(f string, a ...any) {
-	fprt(os.Stdout, f, a...)
+// prtf prints a line to stdout.
+func prtf(f string, a ...any) {
+	fprtf(os.Stdout, f, a...)
 }
 
-// fprt prints a line to a io.Writer.
-func fprt(w io.Writer, f string, a ...any) {
+// fprtf prints a line to a io.Writer.
+func fprtf(w io.Writer, f string, a ...any) {
 	fmt.Fprintf(w, f+"\n", a...)
 }
 

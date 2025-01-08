@@ -9,7 +9,7 @@ import (
 
 // TestSrc ensures all source files are in good shape.
 func TestSrc(t *testing.T) {
-	readFile := func(name string) string {
+	readTextFile := func(name string) string {
 		data, err := os.ReadFile(name)
 		if err != nil {
 			t.Fatal(err)
@@ -34,30 +34,27 @@ func TestSrc(t *testing.T) {
 		var sb strings.Builder
 		printUsage(&sb)
 		usageText := sb.String()
-		readmeText := readFile("README.md")
+		readmeText := readTextFile("README.md")
 		if !strings.Contains(readmeText, usageText) {
 			t.Fatalf("wrong usage in README.md,\nwant %q\nhave %q", usageText, readmeText)
 		}
 	})
 	// README.md version must be in sync
 	t.Run("VersionMustBeInSync", func(t *testing.T) {
-		v := "v" + cutout(readFile("README.md"), "### v", "\n")
+		v := "v" + cutout(readTextFile("README.md"), "### v", "\n")
 		if v != Version {
 			t.Fatal("wrong readme version", v)
 		}
 	})
 	// find markers in source code
 	t.Run("FixmeMarkers", func(t *testing.T) {
-		_, err := os.Stat("go.mod")
-		if err != nil {
-			t.Fatal("must be in src/")
-		}
-		err = fs.WalkDir(os.DirFS("."), ".", func(path string, entry fs.DirEntry, err error) error {
+		readTextFile("go.mod") // make sure we're in root dir
+		err := fs.WalkDir(os.DirFS("."), ".", func(path string, entry fs.DirEntry, err error) error {
 			if err != nil {
 				t.Fatal("WalkDir", err)
 			}
 			if strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "src_test.go") {
-				text := readFile(path)
+				text := readTextFile(path)
 				if strings.Contains(text, "cv"+"vvv") || strings.Contains(text, "FIX"+"ME") {
 					t.Fatal("found cv"+"vvv/FIX"+"ME in ", path)
 				}

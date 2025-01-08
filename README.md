@@ -1,7 +1,7 @@
 # moni - A command line tool for Monibot
 
 [![GoDoc Reference](https://godoc.org/github.com/cvilsmeier/moni?status.svg)](http://godoc.org/github.com/cvilsmeier/moni)
-[![Build Status](https://github.com/cvilsmeier/moni/actions/workflows/go-linux.yml/badge.svg)](https://github.com/cvilsmeier/moni/actions/workflows/go-linux.yml)
+[![Build Status](https://github.com/cvilsmeier/moni/actions/workflows/linux.yml/badge.svg)](https://github.com/cvilsmeier/moni/actions/workflows/linux.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A command line tool for https://monibot.io - Easy Server and Application Monitoring.
@@ -16,28 +16,34 @@ Moni is a command-line tool to interact with the Monibot REST API. It is used to
 - Query metrics from Monibot
 - Send metric values to Monibot
 
-It is written in [Go](https://go.dev/) and runs on Linux/amd64 and Windows/amd64.
+It is written in [Go](https://go.dev/) and runs on Linux and Windows.
 
-## Download
 
-Download a pre-built binary from here:
+## Installation
+
+For installing moni on your machine, we provide several options.
+
+
+### Download a pre-built binary (recommended)
+
+Download a pre-built binary for Linux/amd64 or Windows/amd64 here:
 https://github.com/cvilsmeier/moni/releases/latest
 
 
-## Install
+### Install with go command
 
 If you do not want to download a pre-built binary, you
-can install moni from the command line.
+can install moni from the command line, using Go:
 
 ```
 go install github.com/cvilsmeier/moni@latest
 ```
 
 
-## Build
+### Build from source
 
 If you do not want to download a pre-built binary, you
-can build moni from the command line.
+can build moni from source:
 
 ```
 git clone https://github.com/cvilsmeier/moni
@@ -105,10 +111,7 @@ commands
 
     sample <machineId> <interval>
         Send resource usage (load/cpu/mem/disk) samples for machine.
-        Moni consults various files (/proc/loadavg, /proc/cpuinfo,
-        etc.) and commands (/usr/bin/free, /usr/bin/df, etc.) to
-        calculate resource usage. Therefore it currently supports
-        linux only. Moni will stay in background and keep sampling
+        This command will stay in background and keep sampling
         in specified interval. Min. interval is 5m.
 
     text <machineId> <filename>
@@ -165,8 +168,7 @@ Exit Codes
 
 ### v0.3.0
 
-- remove watchdog, machine and metric command
-- use shirou/gopsutil for machine sampling (to support windows)
+- use shirou/gopsutil for machine sampling (support windows)
 
 ### v0.2.2
 
