@@ -1,0 +1,27 @@
+name: build
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.23']  # go-version: ['1.21', '1.22', '1.23']
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup go ${{matrix.go-version}}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{matrix.go-version}}
+      - name: build linux
+        run: |
+          export CGO_ENABLED=0
+          go version
+          go test ./...
+          go build -v .
+          mkdir -p _dist/linux
+          cp moni README _dist/linux
+      - name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: moni-linux
+          path: _dist/linux
