@@ -1,22 +1,27 @@
-name: go-build
+name: go-linux
 on: [push]
 jobs:
   build:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
         go-version: ['1.21', '1.22', '1.23']
-    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - name: setup go ${{matrix.go-version}}
         uses: actions/setup-go@v5
         with:
           go-version: ${{matrix.go-version}}
-          cache: false
       - name: version
         run: go version
       - name: test
         run: go test ./...
       - name: build
         run: CGO_ENABLED=0 go build -v .
+      - name: tar
+        run: tar -czvf moni-linux.tar.gz README.md moni
+      - name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: moni-linux.tar.gz
+          path: moni-linux.tar.gz
