@@ -1,19 +1,15 @@
 # moni - A command line tool for Monibot
 
 [![GoDoc Reference](https://godoc.org/github.com/cvilsmeier/moni?status.svg)](http://godoc.org/github.com/cvilsmeier/moni)
-[![Build Status](https://github.com/cvilsmeier/moni/actions/workflows/linux.yml/badge.svg)](https://github.com/cvilsmeier/moni/actions/workflows/linux.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A command line tool for https://monibot.io - Easy Server and Application Monitoring.
+A command line tool for https://monibot.io - Website and Server Monitoring.
 
 Moni is a command-line tool to interact with the Monibot REST API. It is used to
 
-- Query watchdogs from Monibot
 - Send watchdog heartbeats to Monibot
-- Query machines from Monibot
 - Send machine resource usage samples (CPU/Memory/Disk/Clock/Network) to Monibot
-- Send machine texts (command outputs) to Monibot
-- Query metrics from Monibot
+- Send machine text data to Monibot
 - Send metric values to Monibot
 
 It is written in [Go](https://go.dev/) and runs on Linux and Windows.
