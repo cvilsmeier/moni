@@ -91,24 +91,30 @@ commands
 
     ping
         Ping the Monibot API. If an error occurs, moni will print
-        that error. It it succeeds, moni will print nothing.
+        that error. If it succeeds, it will print nothing.
 
     watchdogs
         List heartbeat watchdogs.
+
+    watchdog <watchdogId>
+        Get heartbeat watchdog by id.
 
     heartbeat <watchdogId> [interval]
         Send a heartbeat. If interval is not specified, moni sends
         one heartbeat and exits. If interval is specified, moni
         will stay in the background and send heartbeats in that
-        interval. Min. interval is 5m.
+        interval. Minimum interval is 5m.
 
     machines
         List machines.
 
+    machine <machineId>
+        Get machine by id.
+
     sample <machineId> <interval>
         Send resource usage (load/cpu/mem/disk) samples for machine.
         This command will stay in background and keep sampling
-        in specified interval. Min. interval is 5m.
+        in specified interval. Minimum interval is 5m.
 
     text <machineId> <filename>
         Send filename as text for machine.
@@ -117,10 +123,13 @@ commands
         associated with texts. Moni will send the file as text and
         then exit. If an error occurs, moni will print an error
         message. Otherwise moni will print nothing.
-        Max. filesize is 204800 bytes.
+        Maximum filesize is 200K.
 
     metrics
         List metrics.
+
+    metric <metricId>
+        Get metric by id.
 
     inc <metricId> <value>
         Increment a counter metric.
