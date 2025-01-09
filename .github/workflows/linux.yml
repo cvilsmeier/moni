@@ -18,5 +18,5 @@ jobs:
           export CGO_ENABLED=0
           go version
           go env
-          go test -v ./...
+          go test -v -count 1 --tags=check ./... 
           go build -v .
