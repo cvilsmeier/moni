@@ -3,7 +3,7 @@
 [![GoDoc Reference](https://godoc.org/github.com/cvilsmeier/moni?status.svg)](http://godoc.org/github.com/cvilsmeier/moni)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A command line tool for https://monibot.io - Website and Server Monitoring.
+A command line tool for https://monibot.io - Website-, Server- and Application Monitoring.
 
 Moni is a command-line tool to interact with the Monibot REST API. It is used to
 
