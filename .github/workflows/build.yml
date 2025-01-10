@@ -28,5 +28,5 @@ jobs:
       - name: upload windows
         uses: actions/upload-artifact@v4
         with:
-          name: moni-windows.tar.gz
-          path: _dist/moni-windows.tar.gz
+          name: moni-windows
+          path: _dist/windows
