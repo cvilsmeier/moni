@@ -22,11 +22,11 @@ jobs:
           scripts/dist.sh
       - name: upload linux
         uses: actions/upload-artifact@v4
-          with:
-            name: moni-linux.tar.gz
-            path: _dist/moni-linux.tar.gz
+        with:
+          name: moni-linux.tar.gz
+          path: _dist/moni-linux.tar.gz
       - name: upload windows
         uses: actions/upload-artifact@v4
-          with:
-            name: moni-windows.tar.gz
-            path: _dist/moni-windows.tar.gz
+        with:
+          name: moni-windows.tar.gz
+          path: _dist/moni-windows.tar.gz
