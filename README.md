@@ -1,7 +1,7 @@
 # moni - A command line tool for Monibot
 
 [![GoDoc Reference](https://godoc.org/github.com/cvilsmeier/moni?status.svg)](http://godoc.org/github.com/cvilsmeier/moni)
-![build](https://github.com/cvilsmeier/moni/actions/workflows/build.yml/badge.svg)
+[![build](https://github.com/cvilsmeier/moni/actions/workflows/build.yml/badge.svg)](https://github.com/cvilsmeier/moni/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A command line tool for https://monibot.io - Website-, Server- and Application Monitoring.
