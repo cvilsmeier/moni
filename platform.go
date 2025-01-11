@@ -52,12 +52,12 @@ func (p *Platform) DiskPercent() (float64, error) {
 	var total uint64
 	var used uint64
 	for _, partition := range partitions {
-		p.debugf("Platform.DiskPercent(): include %s (mnt %s)", partition.Device, partition.Mountpoint)
 		usage, err := disk.Usage(partition.Mountpoint)
 		if err != nil {
 			log.Printf("WARNING: cannot disk.Usage(%q): %s", partition.Mountpoint, err)
 			continue
 		}
+		p.debugf("Platform.DiskPercent(): %q (%q)  Total=%d, Used=%d", partition.Device, partition.Mountpoint, usage.Total, usage.Used)
 		total += usage.Total
 		used += usage.Used
 	}
@@ -77,18 +77,19 @@ func (p *Platform) DiskBytes() (uint64, uint64, error) {
 	if err != nil {
 		return 0, 0, fmt.Errorf("cannot disk.Partitions(): %w", err)
 	}
-	var readBytes, writeBytes uint64
+	var names []string
 	for _, partition := range partitions {
-		p.debugf("Platform.DiskBytes(): include %s (mnt %s)", partition.Device, partition.Mountpoint)
-		iocMap, err := disk.IOCounters(partition.Device)
-		if err != nil {
-			log.Printf("WARNING: cannot disk.IOCounters(%q): %s", partition.Device, err)
-			continue
-		}
-		for _, ioc := range iocMap {
-			readBytes += ioc.ReadBytes
-			writeBytes += ioc.WriteBytes
-		}
+		names = append(names, partition.Device)
+	}
+	var readBytes, writeBytes uint64
+	iocMap, err := disk.IOCounters(names...)
+	if err != nil {
+		log.Printf("WARNING: cannot disk.IOCounters(%v): %s", names, err)
+	}
+	for name, ioc := range iocMap {
+		p.debugf("Platform.DiskBytes(): %q  ReadBytes=%d, WriteBytes=%d", name, ioc.ReadBytes, ioc.WriteBytes)
+		readBytes += ioc.ReadBytes
+		writeBytes += ioc.WriteBytes
 	}
 	return readBytes, writeBytes, nil
 }
@@ -100,12 +101,12 @@ func (p *Platform) NetBytes() (uint64, uint64, error) {
 	}
 	var recvBytes, sendBytes uint64
 	for _, ioc := range iocs {
-		skip := strings.HasPrefix(ioc.Name, "lo")
+		skip := strings.HasPrefix(strings.ToLower(ioc.Name), "lo")
 		if skip {
 			p.debugf("Platform.NetBytes(): skip %q", ioc.Name)
 			continue
 		}
-		p.debugf("Platform.NetBytes(): include %q", ioc.Name)
+		p.debugf("Platform.NetBytes(): %q  BytesRecv=%d, BytesSent=%d", ioc.Name, ioc.BytesRecv, ioc.BytesSent)
 		recvBytes += ioc.BytesRecv
 		sendBytes += ioc.BytesSent
 	}
@@ -114,6 +115,6 @@ func (p *Platform) NetBytes() (uint64, uint64, error) {
 
 func (p *Platform) debugf(f string, a ...any) {
 	if p.verbose {
-		log.Printf("DEBUG: "+f, a...)
+		log.Printf("VERBOSE: "+f, a...)
 	}
 }

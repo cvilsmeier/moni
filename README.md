@@ -171,6 +171,10 @@ Exit Codes
 
 ## Changelog
 
+### v0.4.0
+
+- skip loopback network interface(s) on windows
+
 ### v0.3.0
 
 - use shirou/gopsutil for machine sampling (support windows)

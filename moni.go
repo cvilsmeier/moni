@@ -23,7 +23,7 @@ import (
 )
 
 // Version is the moni tool version
-const Version = "v0.3.0"
+const Version = "v0.4.0"
 
 // config flag definitions
 const (
@@ -556,5 +556,5 @@ func fprtf(w io.Writer, f string, a ...any) {
 type ApiLogger struct{}
 
 func (l *ApiLogger) Debug(format string, args ...any) {
-	log.Printf("DEBUG: MONIBOT: "+format, args...)
+	log.Printf("VERBOSE: (API) "+format, args...)
 }

@@ -1,5 +1,3 @@
-//go:build check
-
 package main
 
 import (
@@ -9,9 +7,7 @@ import (
 	"testing"
 )
 
-// TestCheck checks all source files. Depends on build tag 'check':
-//
-//	go test ./...
+// TestCheck checks all source files.
 func TestCheck(t *testing.T) {
 	readTextFile := func(name string) string {
 		data, err := os.ReadFile(name)
