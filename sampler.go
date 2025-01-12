@@ -17,11 +17,11 @@ type samplerPlatform interface {
 }
 
 type Sampler struct {
-	platform             samplerPlatform
-	lastDiskReadSectors  uint64
-	lastDiskWriteSectors uint64
-	lastNetRecvBytes     uint64
-	lastNetSendBytes     uint64
+	platform           samplerPlatform
+	lastDiskReadBytes  uint64
+	lastDiskWriteBytes uint64
+	lastNetRecvBytes   uint64
+	lastNetSendBytes   uint64
 }
 
 func NewSampler(platform samplerPlatform) *Sampler {
@@ -69,21 +69,19 @@ func (s *Sampler) Sample() (monibot.MachineSample, error) {
 		load15 = avg[2]
 	}
 	// Disk IO sectors
-	var diskReadSectors, diskWriteSectors int64
+	var diskReadBytes, diskWriteBytes int64
 	{
 		readBytes, writeBytes, err := s.platform.DiskBytes()
 		if err != nil {
 			return monibot.MachineSample{}, err
 		}
-		readSectors := readBytes / 512
-		if readSectors > s.lastDiskReadSectors {
-			diskReadSectors = int64(readSectors - s.lastDiskReadSectors)
-			s.lastDiskReadSectors = readSectors
+		if readBytes > s.lastDiskReadBytes {
+			diskReadBytes = int64(readBytes - s.lastDiskReadBytes)
+			s.lastDiskReadBytes = readBytes
 		}
-		writeSectors := writeBytes / 512
-		if writeSectors > s.lastDiskWriteSectors {
-			diskWriteSectors = int64(writeSectors - s.lastDiskWriteSectors)
-			s.lastDiskWriteSectors = writeSectors
+		if writeBytes > s.lastDiskWriteBytes {
+			diskWriteBytes = int64(writeBytes - s.lastDiskWriteBytes)
+			s.lastDiskWriteBytes = writeBytes
 		}
 	}
 	// Net IO
@@ -111,8 +109,8 @@ func (s *Sampler) Sample() (monibot.MachineSample, error) {
 		CpuPercent:  cpuPercent,
 		MemPercent:  memPercent,
 		DiskPercent: diskPercent,
-		DiskReads:   diskReadSectors,
-		DiskWrites:  diskWriteSectors,
+		DiskRead:    diskReadBytes,
+		DiskWrite:   diskWriteBytes,
 		NetRecv:     netRecvBytes,
 		NetSend:     netSendBytes,
 	}, nil

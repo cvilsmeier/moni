@@ -172,6 +172,10 @@ Exit Codes
 
 ## Changelog
 
+### v0.5.0
+
+- update github.com/cvilsmeier/monibot-go@v0.2.0
+
 ### v0.4.0
 
 - skip loopback network interface(s) on windows

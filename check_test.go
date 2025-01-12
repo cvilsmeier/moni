@@ -51,9 +51,9 @@ func TestCheck(t *testing.T) {
 		readTextFile("go.mod") // make sure we're in root dir
 		err := fs.WalkDir(os.DirFS("."), ".", func(path string, entry fs.DirEntry, err error) error {
 			if err != nil {
-				t.Fatal("WalkDir", err)
+				return err
 			}
-			if strings.HasSuffix(path, ".go") && !strings.HasSuffix(path, "src_test.go") {
+			if strings.HasSuffix(path, ".go") {
 				text := readTextFile(path)
 				if strings.Contains(text, "cv"+"vvv") || strings.Contains(text, "FIX"+"ME") {
 					t.Fatal("found cv"+"vvv/FIX"+"ME in ", path)
@@ -62,7 +62,7 @@ func TestCheck(t *testing.T) {
 			return nil
 		})
 		if err != nil {
-			t.Fatal("WalkDir", err)
+			t.Fatal("fs.WalkDir", err)
 		}
 	})
 }

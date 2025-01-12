@@ -23,7 +23,7 @@ import (
 )
 
 // Version is the moni tool version
-const Version = "v0.4.0"
+const Version = "v0.5.0"
 
 // config flag definitions
 const (
